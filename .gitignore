@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.vercel/
+.turbo/
+test-results/
+playwright-report/
+media/dreamcatcher/video-raw/
+*.log
+.DS_Store
