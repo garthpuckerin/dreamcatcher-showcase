@@ -333,6 +333,7 @@
     display: grid;
     grid-template-columns: 256px 1fr;
     height: 100vh;
+    height: 100dvh;
     background: var(--bg);
   }
   .fn-canvas-page {
@@ -556,6 +557,7 @@
 
   .auth-screen {
     min-height: 100vh;
+    min-height: 100dvh;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(420px, 0.86fr);
     background:
@@ -570,6 +572,7 @@
     position: relative;
     display: flex;
     min-height: 100vh;
+    min-height: 100dvh;
     flex-direction: column;
     justify-content: space-between;
     overflow: hidden;
@@ -667,6 +670,7 @@
   .auth-form-wrap {
     display: grid;
     min-height: 100vh;
+    min-height: 100dvh;
     place-items: center;
     padding: clamp(28px, 5vw, 64px);
   }

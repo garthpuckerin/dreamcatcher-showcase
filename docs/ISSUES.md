@@ -39,6 +39,17 @@
 
 ## Closed
 
+- ✅ **Missing `viewport-fit=cover` / `100dvh` safe-area handling** (2026-09-12,
+  applied from a prior reveal-season gotcha — GT/Ops both hit a "white strip
+  along the bottom" on home-indicator iPhones from this exact cause and it was
+  logged as reusable across every future demo including dreamcatcher, but
+  wasn't applied here until checked today). Added `viewport-fit=cover` to
+  `index.html`'s viewport meta; added a `100dvh` fallback line after every
+  full-viewport `100vh`/`min-height:100vh` in `theme.css` (`.fn-shell`,
+  `.auth-screen`, `.auth-art`, `.auth-form-wrap`). Cannot be verified
+  headless (`env(safe-area-inset-*)` resolves to 0 in emulators per the prior
+  finding) — real test is on-device. Sweeps re-run clean as a no-regression
+  check (mobile 5/5, viewport 15/15, e2e 3/3).
 - ✅ **Vercel git integration re-pointed** (2026-09-12). `garthpuckerin-dreamcatcher`
   now deploys from this repo's `main` (`vercel git connect`, owner-authenticated);
   live URL byte-verified against the local build.
