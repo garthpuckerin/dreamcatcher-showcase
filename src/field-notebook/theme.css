@@ -5415,36 +5415,21 @@
       min-height: auto;
     }
 
+    /* Bottom-tab mobile shell: below 900px the rail is not squeezed into a
+       horizontal strip, it disappears — the bottom tab bar (.fn-mtab) plus
+       the "More" sheet are the phone's primary nav instead. One nav
+       treatment below this breakpoint, not two. */
     .fn-shell {
       grid-template-columns: 1fr;
-      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr);
     }
 
     .fn-rail {
-      border-right: 0;
-      border-bottom: 1px solid var(--hairline);
-      max-height: 172px;
-    }
-
-    .fn-rail-head {
-      padding: calc(var(--u) * 3) calc(var(--u) * 4);
-    }
-
-    .fn-rail nav {
-      display: flex;
-      overflow-x: auto;
-      overflow-y: hidden;
-    }
-
-    .fn-rail-section {
-      border-bottom: 0;
-      border-right: 1px solid var(--hairline-2);
-      flex: 0 0 210px;
-      padding: calc(var(--u) * 3) calc(var(--u) * 4);
-    }
-
-    .fn-rail-foot {
       display: none;
+    }
+
+    .fn-main-scroll {
+      padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
     }
 
     .fn-topbar {
@@ -5479,6 +5464,48 @@
       align-items: flex-start;
       flex-direction: column;
     }
+
+    /* Archive/Portfolio card grids were fixed at 3 columns with no phone
+       override — that's a desktop grid squeezed narrow, not a real mobile
+       card list. One column, full-width cards. */
+    .fn-showcase-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* Inbox rows become labeled cards instead of a narrowed 5-column grid
+       row: title/preview stack up top, source/suggested get visible
+       labels, actions move to a full-width row. */
+    .inbox-row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: calc(var(--u) * 2);
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-3);
+      background: var(--surface);
+      padding: calc(var(--u) * 4);
+      margin-bottom: calc(var(--u) * 3);
+    }
+    .inbox-row + .inbox-row {
+      border-top: 1px solid var(--hairline);
+    }
+    .inbox-source,
+    .inbox-suggest {
+      text-align: left;
+    }
+    .inbox-source::before {
+      content: 'Source · ';
+      color: var(--muted);
+    }
+    .inbox-suggest::before {
+      content: 'Suggested · ';
+      color: var(--muted);
+    }
+    .inbox-actions {
+      justify-content: flex-start;
+      padding-top: calc(var(--u) * 1);
+    }
+    .inbox-actions .fn-btn {
+      min-height: 44px;
+    }
   }
 
   @media (max-width: 640px) {
@@ -5499,37 +5526,8 @@
       padding: calc(var(--u) * 6);
     }
 
-    .fn-rail {
-      max-height: none;
-    }
-
     .fn-brand {
       font-size: 20px;
-    }
-
-    .fn-rail nav {
-      display: block;
-      overflow-x: auto;
-    }
-
-    .fn-rail-section {
-      border-right: 0;
-      min-width: max-content;
-      padding: calc(var(--u) * 2) calc(var(--u) * 3);
-    }
-
-    .fn-rail-section:nth-of-type(n + 2) {
-      display: none;
-    }
-
-    .fn-rail-section .fn-nav {
-      flex-direction: row;
-    }
-
-    .fn-rail-section .fn-nav-item {
-      width: auto;
-      gap: calc(var(--u) * 2);
-      white-space: nowrap;
     }
 
     .fn-topbar {
@@ -5993,5 +5991,221 @@
     color: var(--ink-2);
     font-size: 13px;
     line-height: 1.6;
+  }
+
+  /* ============================================================
+     Mobile companion shell (≤900px) — bottom tab bar, "More" nav
+     sheet, and the desk-only "stays at the desk" screen. Pattern
+     ported from grant-tracker-showcase (mobile-tabs.jsx) and
+     ops-command-center-showcase (DESK_ONLY_VIEWS), restyled to
+     Dreamcatcher's tokens. The rail disappears entirely below this
+     breakpoint (see the .fn-rail { display:none } rule above) —
+     this is the phone's primary nav, not a second copy of it.
+     ============================================================ */
+  .fn-mtab {
+    display: none;
+  }
+
+  @media (max-width: 900px) {
+    .fn-mtab {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 60;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: var(--surface);
+      border-top: 1px solid var(--hairline);
+      padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+    }
+    .fn-mtab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      min-height: 48px;
+      background: none;
+      border: 0;
+      border-radius: var(--r-2);
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 10.5px;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+    }
+    .fn-mtab-item[data-on='true'] {
+      color: var(--ink);
+    }
+    .fn-mtab-item[data-on='true'] .fn-mtab-icon {
+      color: var(--accent);
+    }
+    .fn-mtab-icon {
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+    .fn-mtab-badge {
+      position: absolute;
+      top: -6px;
+      right: -10px;
+      min-width: 15px;
+      height: 15px;
+      padding: 0 4px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: var(--surface);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      line-height: 15px;
+      text-align: center;
+    }
+
+    /* "More" nav sheet — full-width bottom sheet, everything not on the
+       bar: secondary tools, desk-only surfaces (marked, not hidden), and
+       sign out. */
+    .fn-more-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      display: flex;
+      align-items: flex-end;
+      background: color-mix(in oklab, black 45%, transparent);
+    }
+    .fn-more-sheet {
+      width: 100%;
+      max-height: 78vh;
+      overflow-y: auto;
+      background: var(--surface);
+      border-top: 1px solid var(--hairline);
+      border-radius: 16px 16px 0 0;
+      padding: calc(var(--u) * 4) calc(var(--u) * 4)
+        calc(var(--u) * 6 + env(safe-area-inset-bottom, 0px));
+      animation: fn-sheet-up 0.2s ease;
+    }
+    @keyframes fn-sheet-up {
+      from {
+        transform: translateY(16px);
+        opacity: 0;
+      }
+      to {
+        transform: none;
+        opacity: 1;
+      }
+    }
+    .fn-more-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: calc(var(--u) * 3);
+    }
+    .fn-more-head h2 {
+      margin: 0;
+      font-family: var(--headline-font);
+      font-size: 18px;
+      color: var(--ink);
+    }
+    .fn-more-close {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--hairline);
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--ink-2);
+    }
+    .fn-more-list {
+      display: flex;
+      flex-direction: column;
+    }
+    .fn-more-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 48px;
+      padding: 0 calc(var(--u) * 2);
+      border-bottom: 1px solid var(--hairline-2);
+      background: none;
+      border-left: 0;
+      border-right: 0;
+      border-top: 0;
+      color: var(--ink);
+      font-size: 14px;
+      text-align: left;
+    }
+    .fn-more-item[data-active='true'] {
+      color: var(--accent);
+    }
+    .fn-more-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .fn-more-desk {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9.5px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-1);
+      padding: 1px 5px;
+    }
+    .fn-more-foot {
+      margin-top: calc(var(--u) * 2);
+      padding-top: calc(var(--u) * 2);
+      border-top: 1px solid var(--hairline);
+    }
+    .fn-more-signout {
+      color: var(--danger);
+      border-bottom: 0;
+    }
+
+    /* Desk-only "stays at the desk" screen — a designed state, not a dead
+       end: names the surface, says why, and routes to companion work. */
+    .fn-desk-only {
+      max-width: 44ch;
+      margin: calc(var(--u) * 10) auto;
+      padding: 0 calc(var(--u) * 5) calc(var(--u) * 12);
+      text-align: left;
+    }
+    .fn-desk-only-kicker {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: calc(var(--u) * 2);
+    }
+    .fn-desk-only-title {
+      font-family: var(--headline-font);
+      font-size: 28px;
+      line-height: 1.2;
+      color: var(--ink);
+      margin: 0 0 calc(var(--u) * 4);
+    }
+    .fn-desk-only-title em {
+      font-style: italic;
+      color: var(--accent);
+    }
+    .fn-desk-only-why {
+      color: var(--ink-2);
+      font-size: 14.5px;
+      line-height: 1.65;
+      margin: 0 0 calc(var(--u) * 3);
+    }
+    .fn-desk-only-note {
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.65;
+      margin: 0 0 calc(var(--u) * 6);
+    }
+    .fn-desk-only-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: calc(var(--u) * 2);
+    }
   }
 }

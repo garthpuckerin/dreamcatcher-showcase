@@ -2,6 +2,8 @@ import { lazy, Suspense, useEffect, useMemo, useState, useCallback } from 'react
 import './theme.css'
 import { DREAMS, INBOX, AI_SUGGESTIONS, USER } from './fixtures'
 import { useAppearanceSettings, useStoredDreams } from './helpers'
+import { DESK_ONLY_VIEWS } from './deskOnly'
+import { MobileTabBar, MoreSheet, DeskOnlyScreen } from './MobileNav'
 import Rail from './Rail'
 import Topbar from './Topbar'
 import CommandPalette from './CommandPalette'
@@ -39,6 +41,24 @@ const BuilderNotes = lazy(() => import('./views/BuilderNotes'))
 
 const SESSION_KEY = 'fn:session:v1'
 
+const MOBILE_QUERY = '(max-width: 900px)'
+
+// Bottom-tab mobile shell kicks in at the same breakpoint the rail used to
+// collapse at, so there is exactly one nav treatment below 900px, not two.
+function useIsMobile() {
+  const [mobile, setMobile] = useState(() =>
+    typeof window === 'undefined' ? false : window.matchMedia(MOBILE_QUERY).matches
+  )
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const mq = window.matchMedia(MOBILE_QUERY)
+    const onChange = e => setMobile(e.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+  return mobile
+}
+
 function shouldOpenOnboarding() {
   try {
     if (typeof window === 'undefined') return false
@@ -49,6 +69,8 @@ function shouldOpenOnboarding() {
 }
 
 export default function FieldNotebookApp() {
+  const isMobile = useIsMobile()
+  const [moreOpen, setMoreOpen] = useState(false)
   const [appearance, updateAppearance] = useAppearanceSettings()
   const [signedIn, setSignedIn] = useState(() => {
     try {
@@ -83,6 +105,7 @@ export default function FieldNotebookApp() {
         setAiOpen(false)
         setNewDreamOpen(false)
         setNewFragmentOpen(false)
+        setMoreOpen(false)
         setReplayOpen(false)
         setOpenFragmentId(null)
       } else if (isMod && e.key.toLowerCase() === '/') {
@@ -136,7 +159,13 @@ export default function FieldNotebookApp() {
     },
     [setRoute]
   )
-  const goRoute = useCallback(r => setRoute(r), [setRoute])
+  const goRoute = useCallback(
+    r => {
+      setRoute(r)
+      setMoreOpen(false)
+    },
+    [setRoute]
+  )
   const dream =
     route.kind === 'dream' || route.kind === 'case' ? dreams.find(d => d.id === route.id) : null
 
@@ -344,7 +373,9 @@ export default function FieldNotebookApp() {
   )
 
   let canvas
-  if (route.kind === 'dream' && dream) {
+  if (isMobile && DESK_ONLY_VIEWS[route.kind]) {
+    canvas = <DeskOnlyScreen route={route} onRoute={goRoute} />
+  } else if (route.kind === 'dream' && dream) {
     canvas = (
       <DreamDetail
         dream={dream}
@@ -481,6 +512,22 @@ export default function FieldNotebookApp() {
         />
         <div className="fn-scroll fn-main-scroll flex-1 overflow-y-auto">{canvas}</div>
       </main>
+
+      <MobileTabBar
+        route={route}
+        onRoute={goRoute}
+        onMore={() => setMoreOpen(v => !v)}
+        moreOpen={moreOpen}
+        counts={counts}
+      />
+      <MoreSheet
+        open={moreOpen}
+        route={route}
+        onRoute={goRoute}
+        onClose={() => setMoreOpen(false)}
+        onSignOut={signOut}
+        counts={counts}
+      />
 
       <CommandPalette
         open={paletteOpen}

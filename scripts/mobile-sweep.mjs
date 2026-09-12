@@ -2,27 +2,25 @@
  * measures at the pixel level but doesn't walk every screen for: nested
  * scroll regions, over-columned grids, and sideways scroll.
  *
- * HONESTY NOTE: Dreamcatcher has NO dedicated mobile companion surface (no
- * bottom tab bar, no `.mtab`-equivalent, no separate mobile shell/component
- * tree). Below 900px the same `.fn-rail` collapses from a vertical column
- * into a horizontally-scrolling top strip (`overflow-x: auto`), and below
- * 640px only the first Rail section (Workspace: Today/All Dreams/Inbox/AI
- * Suggestions/Archive) stays visible — Brands, Tools (including Revisions
- * and Graph), and Recent are hidden by `.fn-rail-section:nth-of-type(n+2) {
- * display: none }` and are reachable on a phone ONLY via the Command
- * Palette (tap the search pill in the topbar). That is a real, load-bearing
- * navigation constraint on phones, not a bug this sweep asserts against —
- * it is called out here so it isn't rediscovered as a mystery later. The
- * bottom-tab-bar-collision check from the house template is therefore
- * dropped (there is no bottom tab bar to collide with anything); the
- * checks that apply regardless of a dedicated mobile mode — sideways
- * scroll, nested scroll regions, over-columned grids — are kept.
+ * Below 900px Dreamcatcher now has a real mobile-native companion shell:
+ * `.fn-rail` is `display:none` (the vertical nav strip does not exist on
+ * phones at all, collapsed or otherwise) and `.fn-mtab` — a fixed 4-item
+ * bottom tab bar (Today / All Dreams / Inbox / More) — is the primary phone
+ * nav instead. "More" opens a full-screen nav sheet listing every other
+ * destination, including the DESK_ONLY_VIEWS routes (Builder Notes, Case
+ * Study Composer, Graph) marked with a "desk" tag rather than hidden; those
+ * three render a designed "stays at the desk" screen instead of their
+ * authoring UI when visited on a phone viewport (see src/field-notebook/
+ * deskOnly.js). Revisions and Settings stay reachable and fully usable on
+ * the phone.
  *
  *  1. Nested scroll regions on phones — anything that scrolls inside the
  *     page besides the one legitimate scroll surface (`.fn-main-scroll` /
- *     `.fn-scroll`), a drawer/modal/dialog, or the Rail's own intentional
- *     horizontal strip.
+ *     `.fn-scroll`), a drawer/modal/dialog/nav-sheet.
  *  2. Grids that stay multi-column at widths where they can't afford to.
+ *     `.fn-mtab` is allow-listed: a fixed-width bottom tab bar is nav
+ *     chrome, not a content grid squeezed narrow — narrow, equal-width
+ *     tab columns are the intended shape at every phone width.
  *  3. Sideways scroll (the page never pans).
  *
  *   BASE_URL=https://… node scripts/mobile-sweep.mjs   (defaults to live)
@@ -57,7 +55,7 @@ const MAX_COLS = { phone: 2, 'phone-land': 3, tablet: 4 }
 //   - deliberately dense by design: `heatmap` is an 84-cell (12x7) activity
 //     heatmap, the same category as a GitHub contribution graph — small
 //     cells at every viewport is the intended look, not a squeeze defect.
-const GRID_ALLOW = ['fn-stats', 'fn-field-grid', 'settings-control-group', 'graph-legend', 'fn-todo', 'fn-collab-row', 'heatmap']
+const GRID_ALLOW = ['fn-stats', 'fn-field-grid', 'settings-control-group', 'graph-legend', 'fn-todo', 'fn-collab-row', 'heatmap', 'fn-mtab']
 
 // Elements with their own deliberate horizontal scroll, verified by reading
 // their CSS: `.builder-matrix` is a dense feature-comparison table given

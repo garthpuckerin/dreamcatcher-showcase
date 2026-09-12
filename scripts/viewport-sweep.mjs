@@ -1,8 +1,8 @@
 /* Viewport sweep — measures Dreamcatcher's key screens across the real
  * device matrix and reports layout defects: sideways scroll, a top bar that
- * grows unreasonably tall, the Rail's mobile top-strip collapse (below
- * 900px the vertical Rail becomes a horizontally-scrolling strip — verify it
- * actually did, not a half-collapsed hybrid), the New Dream modal not
+ * grows unreasonably tall, the Rail actually disappearing below 900px (it is
+ * `display:none` on phones now — the bottom tab bar `.fn-mtab` is the primary
+ * nav there instead, checked in mobile-sweep.mjs), the New Dream modal not
  * fitting a short viewport (`.fn-modal-backdrop` has no overflow-y and
  * `.fn-modal` uses `overflow: hidden` with no internal scroll — a tall form
  * on a short viewport has nowhere to go), and the AI Assistant side panel
@@ -68,6 +68,7 @@ for (const [vpName, width, height] of VIEWPORTS) {
         return { x: b.x, y: b.y, w: b.width, h: b.height, bottom: b.bottom, right: b.right, display: cs.display, overflowX: cs.overflowX, overflowY: cs.overflowY }
       }
       const rail = r('.fn-rail')
+      const mtab = r('.fn-mtab')
       const search = r('.fn-search')
       const actions = r('.fn-topbar-actions')
       const overlapX = search && actions ? Math.min(search.right, actions.right) - Math.max(search.x, actions.x) : 0
@@ -77,6 +78,7 @@ for (const [vpName, width, height] of VIEWPORTS) {
         vh: innerHeight,
         scrollW: document.documentElement.scrollWidth,
         rail,
+        mtab,
         topbar: r('.fn-topbar'),
         search,
         actions,
@@ -88,14 +90,17 @@ for (const [vpName, width, height] of VIEWPORTS) {
     if (m.scrollW > m.vw + 1) note(vpName, scrName, `sideways scroll (${m.scrollW} > ${m.vw})`)
 
     const phoneRailTier = width <= 900
-    if (phoneRailTier && m.rail) {
-      // Below 900px the Rail collapses from a full-height vertical column
-      // into a full-WIDTH but SHORT top strip (its own `nav` scrolls
-      // horizontally inside a max-height: 172px band) — so width is not the
-      // right axis to check on this tier; height is.
-      if (m.rail.h > 200) {
-        note(vpName, scrName, `Rail top-strip is ${Math.round(m.rail.h)}px tall (expected the ~172px collapsed strip below 900px)`)
-      }
+    if (phoneRailTier && m.rail && m.rail.display !== 'none') {
+      // Below 900px the Rail must not render at all — it is `display:none`
+      // in favor of the bottom tab bar (`.fn-mtab`); a visible Rail here
+      // means the old collapsed-top-strip layout regressed back in.
+      note(vpName, scrName, `Rail is visible below 900px (display: ${m.rail.display}) — expected display:none in favor of the bottom tab bar`)
+    }
+    if (phoneRailTier && (!m.mtab || m.mtab.display === 'none')) {
+      note(vpName, scrName, 'bottom tab bar (.fn-mtab) is not rendered below 900px')
+    }
+    if (!phoneRailTier && m.mtab && m.mtab.display !== 'none') {
+      note(vpName, scrName, `bottom tab bar (.fn-mtab) is visible above the mobile tier (display: ${m.mtab.display})`)
     }
     if (!phoneRailTier && m.rail && m.rail.w > 340) {
       note(vpName, scrName, `Rail unexpectedly wide (${Math.round(m.rail.w)}px) above the mobile collapse tier`)

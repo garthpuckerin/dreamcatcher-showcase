@@ -6,11 +6,17 @@ import { COLLABORATORS, STATUSES, BRANDS } from '../fixtures'
 const DEMO_PRESENCE_TOOLTIP =
   'Demo presence indicator. In production, this reflects live collaborator activity.'
 
+const isNarrowViewport = () =>
+  typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches
+
 export default function AllDreams({ dreams, onOpenDream }) {
   const [filterStatus, setFilterStatus] = useState('all')
   const [filterBrand, setFilterBrand] = useState('all')
   const [sortBy, setSortBy] = useState('updated')
-  const [view, setView] = useState('list')
+  // Phones default to the card grid — a real mobile-native card layout,
+  // not a desktop row narrowed to one column. Desktop keeps the list
+  // default; the segmented control still lets either surface switch.
+  const [view, setView] = useState(() => (isNarrowViewport() ? 'cards' : 'list'))
 
   const filtered = useMemo(() => {
     let xs = dreams

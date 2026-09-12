@@ -50,3 +50,49 @@ multi-user/role model) is a production roadmap item, not an audited, built
 capability — depicting a persona switcher here would overstate the product's
 actual multi-user maturity. One signed-in workspace owner with full access is
 the honest scope.
+
+## 2026-09-12 — Mobile companion surface: bottom tabs + surface-scoped desk-only, not a reflowed desktop
+
+**Decision:** below 900px, Dreamcatcher gets a genuine mobile-native
+companion shell instead of the rail-collapses-into-a-strip treatment it had
+before: a bottom tab bar (Today / All Dreams / Inbox / More) is the primary
+nav, `.fn-rail` is `display:none` (not collapsed — gone), and three routes
+render a designed "stays at the desk" screen instead of their authoring UI
+on a phone: **Builder Notes**, the **Case Study Composer**, and **Graph**.
+Revisions and Settings are deliberately *not* desk-only.
+
+**Per-surface rationale:**
+- **Builder Notes → desk-only.** Long-form direction copy paired with a
+  proof matrix (`builder-matrix`, already given `overflow-x: auto` +
+  `min-width: 920px` on desktop) that's meant to be scanned side-by-side —
+  authoring-adjacent reference material, not a triage task.
+- **Case Study Composer → desk-only.** Composing means arranging sections,
+  media, and narrative against each other while drafting — a desktop
+  authoring surface by nature, not something a phone form should attempt.
+- **Graph → desk-only.** The core interaction is clicking one specific
+  citation edge among several packed close together on a wide,
+  horizontally-laid-out SVG timeline to read its quote. That needs a
+  precise pointer and real screen width; a thumb on overlapping edges at
+  phone width would misfire more than it would work. This is a "does the
+  core interaction survive at phone width" call, not a blanket
+  "visualizations are desk-only" rule.
+- **Revisions → stays a companion surface.** Its core interaction is
+  reading one card of proposed-split evidence and pressing exactly one of
+  two buttons (Ratify / Reject) — genuinely usable at phone width with no
+  loss of the interaction's substance. Cardify/reflow wasn't even needed;
+  the existing `.revision-card` layout already reads fine narrow.
+- **Settings → stays a companion surface.** It's rows of toggles and
+  `<select>`s across ten tabs — tall on a phone, not unusable. No single
+  panel demands desktop screen real estate the way Builder Notes' matrix or
+  Graph's edge-picking does.
+
+**Rationale (the mechanism):** ported two already-proven patterns rather
+than inventing a new one: `grant-tracker-showcase`'s bottom-tab-bar +
+"More" nav-sheet shape (`mobile-tabs.jsx`), and
+`ops-command-center-showcase`'s `DESK_ONLY_VIEWS` surface-scoped-authority
+policy (checked against `route.kind`, including deep links, not just nav
+clicks — a saved/restored route into a desk-only view gets the honest
+screen too). Dreamcatcher's content model has no tables to run
+`cardify.js` against, so the card treatment for All Dreams / Archive /
+Inbox is content-specific rather than a drop-in port — see
+`docs/ISSUES.md` (2026-09-12 entry) for what shipped there.

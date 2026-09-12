@@ -3,11 +3,16 @@ import { Search } from 'lucide-react'
 import { fmtDate, statusMap, brandMap } from '../helpers'
 import { ARCHIVED } from '../fixtures'
 
+const isNarrowViewport = () =>
+  typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches
+
 export default function Archive({ archivedDreams = [], onRestore, onDelete, onDemoAction }) {
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('all')
   const [sortBy, setSortBy] = useState('archived')
-  const [view, setView] = useState('list')
+  // Phones default to the card grid for the same reason as All Dreams: a
+  // real mobile-native card layout, not a narrowed desktop row.
+  const [view, setView] = useState(() => (isNarrowViewport() ? 'cards' : 'list'))
 
   const rows = useMemo(
     () => [

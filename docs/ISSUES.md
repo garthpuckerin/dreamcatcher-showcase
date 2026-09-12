@@ -108,3 +108,52 @@
   `scripts/capture-dreamcatcher-preview.mjs`'s default `PREVIEW_URL` to 3177.
   `scripts/run-release-sweeps.mjs` already used its own dedicated port (3310)
   and was unaffected.
+- ✅ **Mobile ≤900px was a desktop UI squeezed into a phone viewport, not a
+  real mobile surface** (2026-09-12, owner-caught). The rail collapsed into a
+  horizontally-scrolling pill strip at the top of the page and every canvas
+  view was the same desktop grid/row layout narrowed to one column. Rebuilt
+  as a genuine mobile-native companion shell, porting the pattern already
+  proven in `grant-tracker-showcase` (`mobile-tabs.jsx` bottom tab bar +
+  `cardify.js` card-lists) and `ops-command-center-showcase`
+  (`DESK_ONLY_VIEWS` surface-scoped mobile authority), adapted to
+  Dreamcatcher's route shape and its dream-card/fragment content model
+  (there are no `<table>`s to cardify here, so the card treatment is
+  content-specific per view — see below). Shipped:
+  - `src/field-notebook/MobileNav.jsx` — `.fn-mtab` bottom tab bar (Today /
+    All Dreams / Inbox / More) plus a `.fn-more-sheet` nav drawer for every
+    other destination, with desk-only routes marked "desk" (not hidden).
+  - `src/field-notebook/deskOnly.js` — `DESK_ONLY_VIEWS` keyed by
+    `route.kind`, checked against deep links (a restored/saved route), not
+    just nav clicks, so a phone visitor can't reach the authoring UI by URL.
+  - `.fn-rail` is now `display:none` below 900px (no more horizontal-strip
+    collapse) and `.fn-shell`'s grid drops back to a single row now that the
+    rail doesn't occupy one.
+  - All Dreams and Archive default to their existing `cards` view (not
+    `list`) below 900px — reusing the already-built `DreamCard`/`ArchiveCard`
+    components rather than inventing new markup. Archive/Portfolio's
+    `.fn-showcase-grid` (previously a fixed 3-column grid with no phone
+    override at all) gets a single-column override.
+  - Inbox rows become bordered, labeled cards via CSS at ≤900px (`Source ·`
+    / `Suggested ·` labels via `::before`, full-width action row) — no
+    `<table>`, so `cardify.js`'s `data-label`-from-`<thead>` mechanism
+    doesn't apply directly; this is the Dreamcatcher-specific adaptation the
+    task called for.
+  - Desk-only calls: Builder Notes (long-form authoring + a proof matrix
+    meant for side-by-side comparison), Case Study Composer (arranging
+    sections/media/narrative is composition, not triage), and Graph (the
+    core interaction is clicking one specific edge among several packed
+    close together on a wide timeline — needs a precise pointer and screen
+    width). Revisions (a single ratify/reject decision after reading a card
+    of text) and Settings (rows of toggles/selects) stay on the phone as
+    companion surfaces — see `docs/DECISIONS.md` for the full rationale.
+  - `scripts/mobile-sweep.mjs` and `scripts/viewport-sweep.mjs` updated: the
+    old "no dedicated mobile shell" honesty note is now stale and rewritten;
+    `.fn-mtab` allow-listed in the grid-column check (nav chrome, not a
+    squeezed content grid); the Rail check now asserts `display:none` below
+    900px (not just "not too tall"), and a new check asserts `.fn-mtab`
+    renders below 900px and stays hidden above it — a real assertion of the
+    new behavior, not just the old bug's absence.
+  - Full `test:release` gate (build + unit + e2e + all 3 sweeps) green.
+  Manually verified via a scripted Playwright pass at 375×812 and 844×390:
+  bottom tabs render and navigate, the Graph desk-only screen shows its
+  honest rationale copy, and Inbox/All Dreams/Archive render as real cards.
