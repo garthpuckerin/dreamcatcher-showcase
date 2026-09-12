@@ -169,12 +169,12 @@ function PageHeader({ totals }) {
           have captured from your AI assistants and coding tools, organised the way you think.
         </p>
       </div>
-      <dl className="fn-stats flex shrink-0 gap-6">
+      <div className="fn-stats flex shrink-0 gap-6">
         <Stat n={totals.dreams} l="Dreams" />
         <Stat n={totals.fragments} l="Fragments" />
         <Stat n={totals.todos} l="Open todos" />
         <Stat n={totals.active} l="In flight" />
-      </dl>
+      </div>
     </header>
   )
 }
@@ -204,7 +204,8 @@ function SortControl({ label, value, onChange, children }) {
         <select
           value={value}
           onChange={e => onChange(e.target.value)}
-          className="appearance-none bg-transparent py-0.5 pl-1 pr-5 text-[12px] text-ink-2 outline-none rounded hover:bg-surface-2"
+          aria-label={label}
+          className="fn-sort-select appearance-none bg-transparent py-0.5 pl-1 pr-5 text-[12px] text-ink-2 outline-none rounded hover:bg-surface-2"
           style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}
         >
           {children}

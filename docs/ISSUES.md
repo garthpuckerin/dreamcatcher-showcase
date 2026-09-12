@@ -8,13 +8,6 @@
 
 ## Open
 
-- 🟡 **No lint script / eslint config.** Not user-visible. Ported as-is from
-  `portofolio-hub/apps/dreamcatcher`, where it's a pre-existing gap shared
-  with the other 3 demo apps (2026-07-02 audit finding — only `apps/web` in
-  the monorepo has lint wired). Verification here relies on build + e2e +
-  the unit/sweep gates, per the same fallback the 2026-08-24 representativeness
-  plan used. Deferred; add if/when the monorepo apps get a coordinated
-  lint pass.
 - 🟡 **No real-time-collaboration surface** — deliberate (see
   `DECISIONS.md` "No RBAC/persona model"), not a defect, but noted here so it
   isn't mistaken for an oversight: production's collaboration layer is
@@ -29,15 +22,116 @@
   is now redundant per the showcase-repo model but is kept per the deferral
   rule until demo↔prod reconciliation is verified (same pattern as every
   prior showcase repo). `ORIGIN.md` updated 2026-09-11 to point here as the
-  canonical dev home. **Now also carries drift**: the 2026-09-12 fixes below
-  (dates.js, theme.css topbar/kpi-grid/modal, Today.jsx) exist only in this
-  repo — sync them into the monorepo copy next time it's touched.
-- 🟢 **No `@axe-core/playwright` a11y coverage** — `grant-tracker-showcase` has
-  it wired into its e2e specs; dreamcatcher's `e2e/` doesn't reference it, so
-  it was deliberately not added as an unwired dependency during the gate-suite
-  port. Follow-up: wire real a11y assertions, then add the dependency.
+  canonical dev home. Synced 2026-09-12 (evening) with every fix in the
+  Closed log below.
+- 🟡 **Safe-area / viewport-fit fixes are verified by no-regression only.**
+  Latent until an owner looks on a home-indicator iPhone:
+  `env(safe-area-inset-*)` resolves to 0 in every headless/emulated browser,
+  so the `viewport-fit=cover` + `100dvh` treatment (closed below) has never
+  been seen on a real device for this demo. Owner action; nothing to fix
+  until it is looked at.
 
 ## Closed
+
+- ✅ **Companion surfaces still carried desktop multi-column grids; several
+  screens rendered content past the right edge of a phone** (2026-09-12,
+  full rescan after the owner's "fix mobile and anything else" direction).
+  The second mobile pass had fixed the grids it *saw*; this pass derived the
+  whole list instead: a static walk over every multi-column
+  `grid-template-columns` in `theme.css` cross-referenced against the
+  ≤900/≤640 blocks (55 base grids, 36 with no phone override), then a
+  runtime walk over every route, Settings section, list/cards state and
+  overlay at 375/768/1024 measuring offscreen content, clipped text, rendered
+  grid tracks and touch targets. Real defects found and fixed, all in the
+  new "Companion-surface completion" block of `theme.css` (each rule names
+  the base declaration it overrides):
+  - **Settings** (`.settings` 220px+1fr): the sidebar nav stayed beside the
+    content at 375px and pushed the whole section ~300px off-screen;
+    `.settings-row` (1fr 260px) left ~80px for the label. Now single-column;
+    the section nav is a native `<select>` on phones (`.settings-jump`, see
+    `DECISIONS.md`), rows stack, controls go full-width; the GitHub
+    connection card, integration mini-cards and plan card stack too.
+  - **Integrations** (`.integration-row` 40px 1fr 100px 160px): copy got
+    ~50px and the Connect/Manage buttons rendered past the viewport edge.
+    Logo + copy on one row, tier and actions beneath.
+  - **Archive list view** (`.fn-archive-row`, 872px minimum, and
+    `.fn-archive-toolbar`): phones default to cards, but the list toggle is
+    still offered and produced a page four times wider than the screen. Rows
+    are now cards below 900px; toolbar stacks.
+  - **Dream detail header** (`.fn-detail-head`): the avatar stack, AI button
+    and five state controls sat in a column to the right of a 46px title,
+    340px past the edge on every dream page (and behind every overlay opened
+    from one). Stacks; state controls wrap; collaborator rows drop the fixed
+    100px role track.
+  - **Page headers** (`.page-head-2`): the trailing chip row (Templates) and
+    action button (Portfolio "+ New case study") were squeezed into a ~40px
+    column beside the lead copy. Stack below 900px.
+  - **Inbox header buttons rendered as two blank squares**: the Inbox page
+    header reuses the `.fn-topbar-actions` class, and the ≤640px topbar rule
+    that turns the shell's action buttons icon-only (`font-size: 0`) was
+    unscoped, so it also erased the labels of "Capture from AI chat" and
+    "Auto-file all" (text glyphs, no svg to keep). Rule scoped to
+    `.fn-topbar > .fn-topbar-actions`.
+  - **Analytics donut** legend got 97px; stacks.
+  - **Touch targets**: switches 36×20, sort selects 23px, chips 28px, auth
+    tabs 30px, inline link-buttons 17–28px. 40px floor for controls, 36px
+    for inline link-buttons, switch keeps its visual and gains a 44px hit
+    area via `::before`. Topbar icon-only buttons are 40px squares.
+  - **`#root` was `width: 100vw` / `height: 100vh` only** (`index.css`):
+    100vw includes the desktop scrollbar gutter, and this file was missed by
+    the earlier `100dvh` pass. Now `100%` and `100vh` + `100dvh`. Body
+    background switched from a navy `#0f172a` to the paper token so iOS
+    overscroll never exposes a dark strip behind the light app.
+  Verified: runtime audit re-run reports zero offscreen/clipped elements
+  and zero sideways-panning canvases on every screen and overlay at
+  375×812, 768×1024 and 1024×768; full release gate green. The derivation
+  is kept as tests: `scripts/mobile-sweep.mjs` now asserts the phone
+  single-column list (`PHONE_SINGLE_COLUMN`), stacked flex rows, a
+  sideways-panning canvas, any element past the viewport edge, the 32px
+  touch-target floor, the Inbox header buttons, every Settings section,
+  and both list views.
+- ✅ **Onboarding tour spotlighted a hidden element on phones** (2026-09-12).
+  Step 1 targeted the rail (`display:none` ≤900px) and step 6 the
+  dream-detail "On this page" rail (hidden ≤1024px), so a phone visitor got
+  a tour card at the top-left with no spotlight and copy about a rail that
+  does not exist. The tour now derives its steps from the shell it finds
+  (`buildTourSteps()` in `DemoOverlays.jsx`): bottom tab bar + "More" sheet
+  copy on phones, Settings' section picker instead of the sidebar nav, the
+  detail-rail step dropped below 1024px, and a zero-size target skips
+  forward instead of spotlighting nothing. `mobile-sweep.mjs` asserts the
+  first step's spotlight is on a rendered element at every phone viewport.
+- ✅ **No lint** (2026-09-12). `eslint.config.js` (flat: `@eslint/js`
+  recommended + `eslint-plugin-react` + `eslint-plugin-react-hooks`,
+  browser+node globals). First run: 12 errors (unused `catch (e)` bindings
+  in every sweep script, an unused `React` import, an unused `useMemo`) and
+  one real hook-deps warning in `DemoChatReplay.jsx` (`messages` rebuilt
+  every render, feeding a `useEffect`) — all fixed. `npm run lint` is now
+  the first step of `test:release`.
+- ✅ **No a11y gate** (2026-09-12). `e2e/accessibility.spec.js` runs axe-core
+  (WCAG 2.0/2.1/2.2 A+AA tags) over 15 screens plus the auth screen, AI
+  Assistant, New Dream modal and the tour, at 1440×900 and 375×812 — 38
+  checks, no rule exclusions. First run failed 38/38; every finding was a
+  real defect and was fixed at the source: the `--muted` text token sat at
+  4.37:1 on the page background (paper/slate 0.55→0.52 L, ink 0.58→0.66; a
+  small oklch→sRGB contrast calculator was used to pick values that clear
+  4.5:1 on bg, surface and surface-2 per theme); `--good` 0.55→0.50 and
+  `--warn` 0.62→0.54; badge and avatar text on tinted backgrounds mixed
+  toward black; the auth demo-notice violet `#a78bfa` (2.24:1) → `#4c35b5`;
+  Brand/Sort selects, the Archive sort select and every Settings input/select
+  had no accessible name (`SettingsRow` now passes its title as the control's
+  `aria-label`); the All Dreams stats `<dl>` held plain `<div>` children;
+  the graph `<svg role="img">` contained focusable edge buttons
+  (`role="group"`); the main canvas scroll region was not keyboard-focusable
+  (`tabIndex=0`).
+- ✅ **Release gate blocked by a leaked preview server on port 3310**
+  (2026-09-12). `scripts/run-release-sweeps.mjs` used `strictPort: true`; a
+  `node scripts/run-release-sweeps.mjs` process from an interrupted earlier
+  run had held 3310 since 01:41 and every sweep run since printed "Port 3310
+  is already in use" and exited 1. The runner now falls back to the next
+  free loopback port (still passing its own URL as `BASE_URL`, so the
+  "local candidate only" rule from the 2026-09-03 decision holds) and closes
+  its server on SIGINT/SIGTERM. The stale process itself is an owner action
+  (this session's process kill was blocked by the tool sandbox).
 
 - ✅ **Mobile rebuild missed several view-level desktop grids, plus a
   vanishing topbar button** (2026-09-12, owner-caught after the mobile

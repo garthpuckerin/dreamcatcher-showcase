@@ -73,7 +73,7 @@ async function main() {
       window.localStorage.removeItem('fn:session:v1')
       window.localStorage.removeItem('fn:route:v1')
       window.localStorage.setItem('fn:onboarding:v1', 'done')
-    } catch (e) {
+    } catch {
       /* no-op */
     }
   })

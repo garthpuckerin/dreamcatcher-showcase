@@ -510,7 +510,9 @@ export default function FieldNotebookApp() {
           onNewDream={() => setNewDreamOpen(true)}
           onNewFragment={() => setNewFragmentOpen(true)}
         />
-        <div className="fn-scroll fn-main-scroll flex-1 overflow-y-auto">{canvas}</div>
+        <div className="fn-scroll fn-main-scroll flex-1 overflow-y-auto" tabIndex={0}>
+          {canvas}
+        </div>
       </main>
 
       <MobileTabBar
@@ -670,7 +672,7 @@ function FieldNotebookAuthScreen({ appearance, onAuthed, onCaseStudy }) {
               background: 'rgba(139,92,246,0.12)',
               border: '1px solid rgba(139,92,246,0.3)',
               fontSize: '0.8rem',
-              color: '#a78bfa',
+              color: '#4c35b5',
             }}
           >
             <span aria-hidden="true">⚹</span>

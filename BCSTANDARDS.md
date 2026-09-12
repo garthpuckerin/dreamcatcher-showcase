@@ -58,10 +58,15 @@
   (owner + AI pair); commits land directly on **`main`**, which is the Vercel
   production branch — **push to `main` auto-deploys** the live demo once the
   git-integrated Vercel project is connected.
-- **Verify before pushing:** `npm run build` (clean), `npm run test:unit`
-  (anchor-coherence + fixture-honesty gates), `npm run test:e2e` (fixtures-only
-  smoke, zero console/page/network errors), and `npm run test:sweeps`
-  (whiteglove/mobile/viewport defect sweeps) must pass. `npm run test:release`
+- **Verify before pushing:** `npm run lint` (eslint, zero findings),
+  `npm run build` (clean), `npm run test:unit` (anchor-coherence +
+  fixture-honesty gates), `npm run test:e2e` (fixtures-only smoke with zero
+  console/page/network errors, plus the axe-core WCAG 2.x A/AA gate over every
+  screen at desktop and phone width — no rule exclusions, fix the surface), and
+  `npm run test:sweeps` (whiteglove/mobile/viewport defect sweeps; the mobile
+  sweep asserts the derived phone single-column list, offscreen content, a
+  sideways-panning canvas, the 32px touch-target floor, and that the tour's
+  first step spotlights something rendered) must pass. `npm run test:release`
   runs the full gate. The fabricated-signal grep-gate
   (`grep -rnE '[0-9]{1,3}\s*%[\s-]*(confidence|confident|accuracy|accurate|match|certainty|certain)|confidence:\s*0?\.[0-9]' src`
   → must be 0 hits) is the honesty-specific check ported from the

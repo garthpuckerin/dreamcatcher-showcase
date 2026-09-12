@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { cloneElement, isValidElement, useState } from 'react'
 import { INTEGRATIONS, USER } from '../../fixtures'
 import { INTEGRATION_META } from './_shared'
 
@@ -99,6 +99,26 @@ export function Settings({
           </button>
         ))}
       </nav>
+      {/* Phone section picker: a native <select> (OS picker sheet on iOS /
+          Android) instead of the 220px sidebar squeezed beside the content.
+          Visibility is swapped with .settings-nav in theme.css at ≤900px. */}
+      <div className="settings-jump" data-tour="fn-settings-jump">
+        <label className="fn-mono-label" htmlFor="settings-section-picker">
+          Section
+        </label>
+        <select
+          id="settings-section-picker"
+          className="settings-input"
+          value={tab}
+          onChange={event => setTab(event.target.value)}
+        >
+          {sections.map(([id, label]) => (
+            <option key={id} value={id}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </div>
       <div>
         {tab === 'account' && (
           <div className="settings-section">
@@ -684,14 +704,26 @@ export function Settings({
   )
 }
 
+// A bare <select>/<input> control inherits the row title as its accessible
+// name (axe: select-name / label) — the visual label is the row's <h4>, which
+// is not associated with the control by markup.
+const NATIVE_FIELD_TYPES = new Set(['select', 'input', 'textarea'])
+
 function SettingsRow({ title, body, children }) {
+  const control =
+    isValidElement(children) &&
+    typeof children.type === 'string' &&
+    NATIVE_FIELD_TYPES.has(children.type) &&
+    !children.props['aria-label']
+      ? cloneElement(children, { 'aria-label': title })
+      : children
   return (
     <div className="settings-row">
       <div>
         <h4>{title}</h4>
         <p>{body}</p>
       </div>
-      <div className="control">{children}</div>
+      <div className="control">{control}</div>
     </div>
   )
 }

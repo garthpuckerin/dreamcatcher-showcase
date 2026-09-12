@@ -96,3 +96,45 @@ screen too). Dreamcatcher's content model has no tables to run
 `cardify.js` against, so the card treatment for All Dreams / Archive /
 Inbox is content-specific rather than a drop-in port — see
 `docs/ISSUES.md` (2026-09-12 entry) for what shipped there.
+
+## 2026-09-12 — Settings' section nav is a native `<select>` on phones
+
+**Decision:** below 900px the Settings sidebar nav (`.settings-nav`, ten
+sections) is hidden and replaced by a native `<select>` (`.settings-jump`),
+not by a horizontally-scrolling strip of section pills.
+
+**Rationale:** the owner has rejected "the left nav collapses into a
+horizontally-scrolling row of pills at the top of the page" outright, three
+projects running (2026-09-12 feedback, recorded in Ogham). A native select is
+the genuinely mobile-native control for "jump to one of N sections" — it opens
+the OS picker sheet on iOS/Android, costs one 44px row, and needs no scrolling
+affordance. The desktop sidebar is untouched; both are rendered and CSS swaps
+their visibility, so the tour and the sweeps can target whichever exists.
+
+## 2026-09-12 — The onboarding tour derives its steps from the shell it finds
+
+**Decision:** `FieldNotebookTour` builds its step list at open time from
+`matchMedia` facts (rail vs bottom tab bar below 900px; dream-detail rail
+hidden below 1024px; Settings sidebar vs section picker), and skips forward if
+a target is in the DOM but renders at zero size.
+
+**Rationale:** the companion-surface doctrine (ops-command-center cycle,
+2026-08-31) says guided tours skip steps that narrate surfaces the device does
+not show. A static step list spotlighted `display:none` elements on phones
+(tour card top-left, no spotlight, copy about a rail that does not exist).
+Deriving from the rendered shell keeps one tour component honest on every
+width instead of maintaining two lists that drift.
+
+## 2026-09-12 — The sweep runner falls back to a free loopback port
+
+**Decision:** `scripts/run-release-sweeps.mjs` still prefers the fixed port
+3310 (strict), but when 3310 is busy it starts the preview on the next free
+loopback port and passes that URL as `BASE_URL` to every sweep.
+
+**Rationale:** the 2026-09-03 decision fixed a strict port so the sweeps can
+never accidentally validate the deployed Vercel site. That rule is about the
+target (the locally built candidate), not the port number: any loopback port
+the runner itself started satisfies it. A leaked preview from an interrupted
+earlier run held 3310 for hours today and turned every gate run into
+"Port 3310 is already in use" — a gate that cannot run is worse than a gate
+on a different local port.

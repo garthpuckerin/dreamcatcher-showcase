@@ -80,10 +80,11 @@ citation-graph model*; the engine and its live AI wiring are the IP.
 npm install
 npm run dev          # Vite dev server
 npm run build        # production build
-npm run test:e2e     # Playwright smoke tests
+npm run lint         # eslint (flat config: js recommended + react + react-hooks)
+npm run test:e2e     # Playwright smoke + axe-core WCAG 2.x A/AA gate (every screen, desktop + phone)
 npm run test:unit    # anchor-coherence + fixture gates (node --test)
 npm run test:sweeps  # whiteglove / mobile / viewport defect sweeps
-npm run test:release # the full release gate (build + unit + e2e + sweeps)
+npm run test:release # the full release gate (lint + build + unit + e2e + sweeps)
 ```
 
 ## Stack

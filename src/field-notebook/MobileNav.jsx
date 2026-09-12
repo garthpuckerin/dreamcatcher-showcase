@@ -34,7 +34,7 @@ const TAB_OF = { dream: 'all', brand: 'all', case: 'more' }
 export function MobileTabBar({ route, onRoute, onMore, moreOpen, counts }) {
   const active = TAB_OF[route.kind] || route.kind
   return (
-    <nav className="fn-mtab" aria-label="Primary (mobile)">
+    <nav className="fn-mtab" aria-label="Primary (mobile)" data-tour="fn-mtab">
       {PRIMARY_TABS.map(tab => {
         const on = active === tab.id
         const Icon = tab.icon

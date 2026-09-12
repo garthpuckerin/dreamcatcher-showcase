@@ -91,7 +91,7 @@ export default function DemoChatReplay({ open, dreams, defaultDreamId, onCapture
     scrollEndRef.current?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' })
   }, [visibleCount, typed, reducedMotion])
 
-  const messages = conversation?.messages ?? []
+  const messages = useMemo(() => conversation?.messages ?? [], [conversation])
   const finished = conversation ? visibleCount >= messages.length : false
 
   // Drive the replay forward when playing.

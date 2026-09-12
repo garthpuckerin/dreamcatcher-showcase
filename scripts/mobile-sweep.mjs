@@ -63,7 +63,33 @@ const GRID_ALLOW = ['fn-stats', 'fn-field-grid', 'settings-control-group', 'grap
 // specifically so it scrolls sideways rather than illegibly compressing —
 // unlike an accidental nested-scroll region, this is the documented pattern
 // for a table too wide to reflow, applied at every tier including phone.
-const SANCTIONED_XSCROLL = ['builder-matrix']
+// `.graph-canvas-wrap` is the Graph's timeline canvas: `overflow-x: auto` by
+// design, so a wide time axis scrolls sideways inside its card (it is desk-only
+// below 900px; this matters at the 1024px tablet-landscape tier).
+const SANCTIONED_XSCROLL = ['builder-matrix', 'graph-canvas-wrap']
+
+// Derived 2026-09-12 (static audit of every multi-column grid in theme.css
+// against the phone breakpoints): companion-surface containers that must be
+// single-column on a phone. Add to this list when a new desktop grid gets a
+// phone override; the sweep then proves the override actually applies.
+const PHONE_SINGLE_COLUMN = [
+  '.settings',
+  '.settings-row',
+  '.settings-card-grid',
+  '.plan-card',
+  '.integration-row',
+  '.fn-archive-toolbar',
+  '.fn-archive-row',
+  '.today-grid',
+  '.today-stat-grid',
+  '.analytics-row',
+  '.velocity-row',
+  '.donut-row',
+  '.fn-showcase-grid',
+  '.inbox-row',
+]
+// Flex rows that must stack on a phone.
+const PHONE_STACKED_FLEX = ['.page-head-2', '.fn-detail-head']
 
 const browser = await chromium.launch()
 const issues = []
@@ -81,7 +107,7 @@ for (const [vpName, width, height, tier] of VIEWPORTS) {
     try {
       window.localStorage.setItem('fn:session:v1', 'active')
       window.localStorage.setItem('fn:onboarding:v1', 'done')
-    } catch (e) {
+    } catch {
       /* no-op */
     }
   })
@@ -96,7 +122,7 @@ for (const [vpName, width, height, tier] of VIEWPORTS) {
 
   const scan = async screen => {
     const r = await page.evaluate(
-      ({ tier, maxCols, allow, sanctionedXScroll }) => {
+      ({ tier, maxCols, allow, sanctionedXScroll, singleColumn, stackedFlex }) => {
         const out = []
         const vis = el => {
           const b = el.getBoundingClientRect()
@@ -148,9 +174,81 @@ for (const [vpName, width, height, tier] of VIEWPORTS) {
           if (cols > maxCols && maxTrack < 120) out.push(`${cols}-column grid at ${Math.round(per)}px/col: ${label(el)}`)
         }
 
+        // 4. The canvas itself pans sideways. `.fn-main-scroll` is
+        // overflow:auto, so a too-wide child never shows up as page-level
+        // sideways scroll (check 3) — it shows up as a canvas that can be
+        // dragged left, which is how the 2026-09-12 Settings / Integrations /
+        // Archive / dream-detail overflows hid from the earlier sweeps.
+        const canvas = document.querySelector('.fn-main-scroll')
+        if (canvas && canvas.scrollWidth > canvas.clientWidth + 1) {
+          out.push(`canvas pans sideways (${canvas.scrollWidth} > ${canvas.clientWidth})`)
+        }
+
+        // 5. Anything rendered past the right edge of the viewport. Outermost
+        // offender only, sanctioned x-scroll containers excluded.
+        const offenders = []
+        for (const el of document.querySelectorAll('body *')) {
+          if (!vis(el)) continue
+          const cs = getComputedStyle(el)
+          if (cs.position === 'fixed') continue
+          if (sanctionedXScroll.some(c => el.closest('.' + c))) continue
+          const b = el.getBoundingClientRect()
+          if (b.right <= innerWidth + 1 && b.left >= -1) continue
+          if (offenders.some(o => o.contains(el))) continue
+          offenders.push(el)
+        }
+        for (const el of offenders.slice(0, 6)) {
+          const b = el.getBoundingClientRect()
+          out.push(`renders past the viewport edge (right=${Math.round(b.right)} of ${innerWidth}): ${label(el)}`)
+        }
+
+        // 6. Phone tier: the derived single-column list. These are the
+        // companion-surface containers whose desktop multi-column grid was
+        // found (statically, from theme.css) to have no phone override on
+        // 2026-09-12; theme.css now stacks each one, and this asserts the
+        // outcome rather than trusting the stylesheet.
+        if (tier === 'phone') {
+          for (const sel of singleColumn) {
+            for (const el of document.querySelectorAll(sel)) {
+              if (!vis(el)) continue
+              const cs = getComputedStyle(el)
+              if (cs.display !== 'grid') continue
+              const tracks = cs.gridTemplateColumns.split(' ').map(parseFloat).filter(w => w > 0)
+              // An icon/index gutter (≤56px) plus one flexible track is a row
+              // shape, not a squeezed content grid — that is the intended
+              // phone layout for .integration-row (40px logo + copy).
+              const gutterRow = tracks.length === 2 && tracks[0] <= 56
+              if (tracks.length > 1 && !gutterRow) out.push(`${sel} is still ${tracks.length}-column on a phone (${tracks.map(Math.round).join('|')})`)
+              break
+            }
+          }
+          for (const sel of stackedFlex) {
+            const el = document.querySelector(sel)
+            if (el && vis(el) && getComputedStyle(el).flexDirection !== 'column') out.push(`${sel} has not stacked to a column on a phone`)
+          }
+
+          // 7. Phone tier: touch-target floor. Switches are excluded — their
+          // 20px visual keeps a 44px hit area via ::before, which a bounding
+          // box cannot see.
+          const small = []
+          for (const el of document.querySelectorAll('button, a[href], select, input:not([type=hidden]), textarea, [role="tab"]')) {
+            if (!vis(el) || el.getAttribute('role') === 'switch') continue
+            const b = el.getBoundingClientRect()
+            if (b.height < 32) small.push(`${label(el)} ${Math.round(b.width)}×${Math.round(b.height)}`)
+          }
+          for (const s of small.slice(0, 6)) out.push(`touch target under 32px: ${s}`)
+        }
+
         return out
       },
-      { tier, maxCols: MAX_COLS[tier], allow: GRID_ALLOW, sanctionedXScroll: SANCTIONED_XSCROLL }
+      {
+        tier,
+        maxCols: MAX_COLS[tier],
+        allow: GRID_ALLOW,
+        sanctionedXScroll: SANCTIONED_XSCROLL,
+        singleColumn: PHONE_SINGLE_COLUMN,
+        stackedFlex: PHONE_STACKED_FLEX,
+      }
     )
     for (const w of [...new Set(r)]) note(vpName, screen, w)
   }
@@ -159,7 +257,7 @@ for (const [vpName, width, height, tier] of VIEWPORTS) {
     await page.addInitScript(r => {
       try {
         window.localStorage.setItem('fn:route:v1', JSON.stringify(r))
-      } catch (e) {
+      } catch {
         /* no-op */
       }
     }, route)
@@ -189,6 +287,90 @@ for (const [vpName, width, height, tier] of VIEWPORTS) {
     await go(route)
     await scan(name)
   }
+
+  // Every Settings section (div-swapped, not route-gated) — each carries its
+  // own set of .settings-row controls.
+  await go({ kind: 'settings' })
+  const sections = await page.evaluate(() =>
+    [...document.querySelectorAll('#settings-section-picker option')].map(o => o.value)
+  )
+  for (const id of sections) {
+    await page.evaluate(v => {
+      const picker = document.querySelector('#settings-section-picker')
+      const nav = [...document.querySelectorAll('.settings-nav button')]
+      const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set
+      if (picker && getComputedStyle(picker).display !== 'none') {
+        setter.call(picker, v)
+        picker.dispatchEvent(new Event('change', { bubbles: true }))
+      } else {
+        const idx = [...document.querySelectorAll('#settings-section-picker option')].findIndex(o => o.value === v)
+        nav[idx]?.click()
+      }
+    }, id)
+    await page.waitForTimeout(150)
+    await scan(`settings:${id}`)
+  }
+
+  // All Dreams and Archive in LIST view — phones default to cards, but the
+  // segmented control still offers the list, so the row layout must hold.
+  for (const [name, route] of [
+    ['all-dreams:list', { kind: 'all' }],
+    ['archive:list', { kind: 'archive' }],
+  ]) {
+    await go(route)
+    const seg = page.locator('.fn-segment button', { hasText: /^list$/ }).first()
+    if (await seg.count()) {
+      await seg.click()
+      await page.waitForTimeout(200)
+      await scan(name)
+    } else note(vpName, name, 'list/cards segmented control not found')
+  }
+
+  // Inbox page-header buttons: they reuse the .fn-topbar-actions class, and
+  // an unscoped topbar rule once collapsed them into blank 32px squares.
+  await go({ kind: 'inbox' })
+  const inboxButtons = await page.evaluate(() =>
+    [...document.querySelectorAll('.inbox-page .fn-topbar-actions .fn-btn')].map(b => ({
+      w: Math.round(b.getBoundingClientRect().width),
+      text: b.textContent.trim().slice(0, 24),
+      fontSize: parseFloat(getComputedStyle(b).fontSize),
+    }))
+  )
+  if (inboxButtons.length !== 2) note(vpName, 'inbox', `expected 2 header buttons, found ${inboxButtons.length}`)
+  for (const b of inboxButtons) {
+    if (b.w < 80 || b.fontSize === 0) note(vpName, 'inbox', `header button "${b.text}" collapsed (${b.w}px wide, font-size ${b.fontSize})`)
+  }
+
+  // Onboarding tour, first step: the spotlight must land on something that
+  // is actually rendered at this width (the rail is display:none on phones;
+  // the tour derives its first step from the shell it finds).
+  await page.addInitScript(() => {
+    try {
+      window.localStorage.removeItem('fn:onboarding:v1')
+    } catch {
+      /* no-op */
+    }
+  })
+  await go({ kind: 'today' })
+  await page.waitForTimeout(400)
+  const tour = await page.evaluate(() => {
+    const spot = document.querySelector('.fn-tour-spotlight')
+    const card = document.querySelector('.fn-tour-card')
+    if (!card) return { card: false }
+    const s = spot ? spot.getBoundingClientRect() : null
+    return {
+      card: true,
+      spot: s ? { w: Math.round(s.width), h: Math.round(s.height), right: Math.round(s.right), bottom: Math.round(s.bottom) } : null,
+      title: card.querySelector('h2')?.textContent,
+    }
+  })
+  if (!tour.card) note(vpName, 'tour', 'tour did not open for a fresh visitor')
+  else if (!tour.spot || tour.spot.w < 40 || tour.spot.h < 20) note(vpName, 'tour', `step "${tour.title}" spotlights nothing rendered (${JSON.stringify(tour.spot)})`)
+  // The spotlight pads its target by 8px on every side, so a target flush
+  // with a viewport edge (the rail, the bottom tab bar) legitimately
+  // extends 8px past it.
+  else if (tour.spot.right > width + 9 || tour.spot.bottom > height + 9) note(vpName, 'tour', `step "${tour.title}" spotlight is off-screen`)
+  await page.keyboard.press('Escape').catch(() => {})
 
   await ctx.close()
 }

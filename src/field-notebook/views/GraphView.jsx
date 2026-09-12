@@ -69,7 +69,7 @@ export default function GraphView() {
             viewBox={`0 0 ${width} ${height}`}
             width={width}
             height={height}
-            role="img"
+            role="group"
             aria-label="Dream graph: nodes in capture order, connected by cited edges"
           >
             {edges.map((edge, index) => {

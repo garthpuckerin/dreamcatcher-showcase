@@ -42,7 +42,7 @@ for (const [vpName, width, height] of VIEWPORTS) {
     try {
       window.localStorage.setItem('fn:session:v1', 'active')
       window.localStorage.setItem('fn:onboarding:v1', 'done')
-    } catch (e) {
+    } catch {
       /* no-op */
     }
   })
@@ -51,7 +51,7 @@ for (const [vpName, width, height] of VIEWPORTS) {
     await page.addInitScript(r => {
       try {
         window.localStorage.setItem('fn:route:v1', JSON.stringify(r))
-      } catch (e) {
+      } catch {
         /* no-op */
       }
     }, route)
@@ -124,7 +124,7 @@ for (const [vpName, width, height] of VIEWPORTS) {
   await page.addInitScript(r => {
     try {
       window.localStorage.setItem('fn:route:v1', JSON.stringify(r))
-    } catch (e) {
+    } catch {
       /* no-op */
     }
   }, { kind: 'all' })
@@ -184,7 +184,7 @@ for (const [vpName, width, height] of VIEWPORTS) {
   await fresh.addInitScript(() => {
     try {
       window.localStorage.removeItem('fn:session:v1')
-    } catch (e) {
+    } catch {
       /* no-op */
     }
   })

@@ -14,8 +14,11 @@ body {
     'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #0f172a;
-  color: #e2e8f0;
+  /* Paper, matching the default field-notebook theme (--bg in theme.css),
+     so iOS overscroll / rubber-band never exposes a navy strip behind the
+     light app. The app root paints its own themed background on top. */
+  background: oklch(0.965 0.006 78);
+  color: #1c1917;
 }
 
 code {
@@ -23,8 +26,12 @@ code {
 }
 
 #root {
-  width: 100vw;
+  /* 100% not 100vw: 100vw includes the scrollbar gutter on desktop and
+     overflows the page by that width. 100dvh after 100vh per the
+     reveal-season safe-area gotcha (iOS dynamic toolbar). */
+  width: 100%;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 

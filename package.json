@@ -9,13 +9,14 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "lint": "eslint .",
     "test:e2e": "playwright test",
     "test:unit": "node --test",
     "test:sweep:mobile": "node scripts/mobile-sweep.mjs",
     "test:sweep:viewport": "node scripts/viewport-sweep.mjs",
     "test:sweep:whiteglove": "node scripts/whiteglove-sweep.mjs",
     "test:sweeps": "node scripts/run-release-sweeps.mjs",
-    "test:release": "npm run build && npm run test:unit && npm run test:e2e && npm run test:sweeps"
+    "test:release": "npm run lint && npm run build && npm run test:unit && npm run test:e2e && npm run test:sweeps"
   },
   "dependencies": {
     "lucide-react": "^0.294.0",
@@ -23,10 +24,16 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.52.0",
     "@tailwindcss/typography": "^0.5.19",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.5.0",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.12.0",
     "postcss": "^8.5.15",
     "tailwindcss": "^3.4.19",
     "vite": "^5.0.8"

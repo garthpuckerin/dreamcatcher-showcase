@@ -10,13 +10,13 @@
   --surface-2: oklch(0.945 0.008 78);
   --ink: oklch(0.21 0.012 60);
   --ink-2: oklch(0.36 0.01 60);
-  --muted: oklch(0.55 0.008 60);
+  --muted: oklch(0.52 0.008 60);
   --hairline: oklch(0.88 0.01 70);
   --hairline-2: oklch(0.92 0.008 70);
   --accent: oklch(0.46 0.13 285);
   --accent-soft: oklch(0.46 0.13 285 / 0.1);
-  --warn: oklch(0.62 0.14 50);
-  --good: oklch(0.55 0.11 150);
+  --warn: oklch(0.54 0.14 50);
+  --good: oklch(0.5 0.11 150);
   --danger: oklch(0.55 0.18 25);
   --r-1: 4px;
   --r-2: 6px;
@@ -30,7 +30,7 @@
   --surface-2: oklch(0.94 0.008 240);
   --ink: oklch(0.22 0.02 250);
   --ink-2: oklch(0.38 0.015 250);
-  --muted: oklch(0.55 0.01 250);
+  --muted: oklch(0.52 0.01 250);
   --hairline: oklch(0.87 0.012 250);
   --hairline-2: oklch(0.92 0.008 250);
 }
@@ -41,7 +41,7 @@
   --surface-2: oklch(0.26 0.018 270);
   --ink: oklch(0.95 0.006 80);
   --ink-2: oklch(0.78 0.012 80);
-  --muted: oklch(0.58 0.014 80);
+  --muted: oklch(0.66 0.014 80);
   --hairline: oklch(0.32 0.018 270);
   --hairline-2: oklch(0.28 0.016 270);
   --accent-soft: oklch(0.65 0.14 285 / 0.18);
@@ -1987,7 +1987,9 @@
     gap: 18px;
   }
   .portfolio-grid {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    /* min(320px, 100%): a 320px floor overflows a 360px phone by 2px once
+       page padding is taken out. */
+    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
   }
   .templates-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -2073,11 +2075,11 @@
     border-radius: 3px;
   }
   .status-badge.public {
-    color: var(--good);
+    color: color-mix(in oklab, var(--good) 72%, black);
     background: color-mix(in oklab, var(--good) 12%, transparent);
   }
   .status-badge.draft {
-    color: var(--warn);
+    color: color-mix(in oklab, var(--warn) 78%, black);
     background: color-mix(in oklab, var(--warn) 14%, transparent);
   }
   .template-card {
@@ -2307,6 +2309,11 @@
     position: sticky;
     top: calc(var(--u) * 8);
     align-self: start;
+  }
+  /* Phone-only section picker (native <select>); shown ≤900px, where the
+     sidebar nav is hidden. */
+  .settings-jump {
+    display: none;
   }
   .settings-nav button {
     text-align: left;
@@ -3329,15 +3336,15 @@
   }
   .fn-dream-avatar-stack span[data-color='amber'] {
     background: color-mix(in oklab, oklch(0.62 0.14 65) 18%, var(--bg));
-    color: oklch(0.62 0.14 65);
+    color: oklch(0.47 0.12 65);
   }
   .fn-dream-avatar-stack span[data-color='forest'] {
     background: color-mix(in oklab, oklch(0.48 0.11 155) 18%, var(--bg));
-    color: oklch(0.48 0.11 155);
+    color: oklch(0.4 0.1 155);
   }
   .fn-dream-avatar-stack span[data-color='rust'] {
     background: color-mix(in oklab, oklch(0.52 0.15 35) 18%, var(--bg));
-    color: oklch(0.52 0.15 35);
+    color: oklch(0.44 0.14 35);
   }
   .fn-dream-avatar-stack span[data-online='true']::after {
     content: '';
@@ -4734,11 +4741,11 @@
   }
   .fn-avatar-stack span:nth-child(2) {
     background: color-mix(in oklab, var(--warn) 22%, var(--surface));
-    color: var(--warn);
+    color: color-mix(in oklab, var(--warn) 78%, black);
   }
   .fn-avatar-stack span:nth-child(3) {
     background: color-mix(in oklab, var(--good) 22%, var(--surface));
-    color: var(--good);
+    color: color-mix(in oklab, var(--good) 72%, black);
   }
   .fn-detail-meta-card {
     display: grid;
@@ -5079,15 +5086,15 @@
   }
   .fn-collab-avatar[data-color='amber'] {
     background: color-mix(in oklab, oklch(0.62 0.14 65) 18%, var(--bg));
-    color: oklch(0.62 0.14 65);
+    color: oklch(0.47 0.12 65);
   }
   .fn-collab-avatar[data-color='forest'] {
     background: color-mix(in oklab, oklch(0.48 0.11 155) 18%, var(--bg));
-    color: oklch(0.48 0.11 155);
+    color: oklch(0.4 0.1 155);
   }
   .fn-collab-avatar[data-color='rust'] {
     background: color-mix(in oklab, oklch(0.52 0.15 35) 18%, var(--bg));
-    color: oklch(0.52 0.15 35);
+    color: oklch(0.44 0.14 35);
   }
   .fn-collab-avatar[data-online='true']::after {
     content: '';
@@ -5372,6 +5379,21 @@
       display: none;
     }
 
+    /* Archive list row (52px 260px+ 140px 280px+ 140px = 872px minimum) does
+       not fit a 1024px viewport beside the 220px rail. Index / title / status
+       on the first row; reason and actions span beneath. */
+    .fn-archive-row {
+      grid-template-columns: 52px minmax(0, 1fr) 140px;
+      row-gap: calc(var(--u) * 2);
+    }
+    .fn-archive-row .fn-archive-reason,
+    .fn-archive-row > .flex {
+      grid-column: 2 / -1;
+    }
+    .fn-archive-row > .flex {
+      justify-content: flex-start;
+    }
+
     .builder-hero,
     .builder-direction {
       grid-template-columns: minmax(0, 1fr);
@@ -5443,7 +5465,7 @@
       min-width: 0;
     }
 
-    .fn-topbar-actions {
+    .fn-topbar > .fn-topbar-actions {
       order: 2;
       margin-left: auto;
     }
@@ -5545,7 +5567,11 @@
       white-space: nowrap;
     }
 
-    .fn-topbar-actions .fn-btn {
+    /* Scoped to the shell topbar: Inbox's page header reuses the
+       .fn-topbar-actions class for its own button cluster, and the
+       unscoped version of this rule collapsed those two labelled buttons
+       into blank 32px squares (their glyphs are text, not svg). */
+    .fn-topbar > .fn-topbar-actions .fn-btn {
       width: 32px;
       padding: 0;
       justify-content: center;
@@ -5556,7 +5582,7 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .fn-topbar-actions .fn-btn svg {
+    .fn-topbar > .fn-topbar-actions .fn-btn svg {
       flex: 0 0 auto;
     }
 
@@ -6217,6 +6243,203 @@
     .analytics-row.analytics-even,
     .velocity-row {
       grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* ===== Companion-surface completion (2026-09-12 rescan) =====
+     Derived once, not found one screenshot at a time: a static pass over
+     every multi-column `grid-template-columns` in this file cross-referenced
+     against the ≤900/≤640 blocks, plus a runtime pass over every screen and
+     overlay at 375px (offscreen content, clipped text, sub-32px targets).
+     Each rule names the base declaration it overrides so the next audit can
+     re-derive the list. `scripts/mobile-sweep.mjs` asserts the single-column
+     outcomes below on every phone run. */
+  @media (max-width: 900px) {
+    /* .page-head-2 (flex row, space-between): the trailing chip-row / action
+       cluster was squeezed into a 40px column beside the lead copy. */
+    .page-head-2 {
+      flex-direction: column;
+      align-items: stretch;
+      gap: calc(var(--u) * 4);
+    }
+    .page-head-2 > .fn-chip-row,
+    .page-head-2 > .fn-topbar-actions {
+      flex-wrap: wrap;
+    }
+    .page-head-2 > .fn-btn {
+      align-self: flex-start;
+    }
+
+    /* .settings (220px 1fr): sidebar + content at phone width pushed the
+       content off the right edge. Single column; the section nav becomes a
+       native <select> (.settings-jump, rendered by Settings.jsx). */
+    .settings {
+      grid-template-columns: minmax(0, 1fr);
+      gap: calc(var(--u) * 5);
+      padding: calc(var(--u) * 5) calc(var(--u) * 4) calc(var(--u) * 12);
+    }
+    .settings-nav {
+      display: none;
+    }
+    .settings-jump {
+      display: grid;
+      gap: 6px;
+    }
+    /* .settings-row (1fr 260px): the fixed 260px control track left ~80px
+       for the label + description. Stack, control full width. */
+    .settings-row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: calc(var(--u) * 3);
+    }
+    .settings-row .control {
+      justify-self: stretch;
+      width: 100%;
+    }
+    .settings-input {
+      width: 100%;
+      max-width: 100%;
+    }
+    /* .settings-integration-card (40px 1fr auto auto) */
+    .settings-integration-card {
+      grid-template-columns: 40px minmax(0, 1fr);
+    }
+    .settings-integration-card > .settings-status,
+    .settings-integration-card > .fn-btn {
+      grid-column: 2;
+      justify-self: start;
+    }
+    /* .settings-card-grid (2 cols), .plan-card (1fr auto) */
+    .settings-card-grid,
+    .plan-card {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* .integration-row (40px 1fr 100px 160px): copy got ~50px and the
+       action cluster rendered past the viewport edge. Logo + copy on the
+       first row, tier and actions beneath the copy. */
+    .integration-row {
+      grid-template-columns: 40px minmax(0, 1fr);
+      row-gap: calc(var(--u) * 2);
+    }
+    .integration-tier,
+    .integration-actions {
+      grid-column: 2;
+    }
+    .integration-actions {
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    /* Archive list view: .fn-archive-toolbar (minmax(280px,1fr) auto auto)
+       overflowed at 375px; .fn-archive-row (52px 260px+ 140px 280px+ 140px)
+       is an 872px-minimum desktop row. Cards default on phones, but the
+       list toggle is still offered, so the row must be a real card too. */
+    .fn-archive-toolbar {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .fn-archive-toolbar > .flex {
+      flex-wrap: wrap;
+    }
+    .fn-archive-row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: calc(var(--u) * 2);
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-3);
+      background: var(--surface);
+      padding: calc(var(--u) * 4);
+      margin-bottom: calc(var(--u) * 3);
+    }
+    .fn-archive-row .fn-dream-index {
+      display: none;
+    }
+    .fn-archive-row > .flex {
+      justify-content: flex-start;
+    }
+
+    /* Dream detail: .fn-detail-head (flex row) put the avatar stack + AI
+       button + five state controls in a column to the right of a 46px
+       title, 340px past the viewport edge. */
+    .fn-detail-head {
+      flex-direction: column;
+      gap: calc(var(--u) * 4);
+    }
+    .fn-detail-title {
+      font-size: 34px;
+    }
+    .fn-detail-actions {
+      align-items: flex-start;
+      width: 100%;
+    }
+    .fn-dream-state-controls {
+      justify-content: flex-start;
+      max-width: none;
+    }
+    .fn-sec-head,
+    .fn-sec-actions {
+      flex-wrap: wrap;
+    }
+    /* .fn-collab-row (32px 1fr 100px auto): the fixed 100px role track left
+       the name ~76px. Role drops under the name. */
+    .fn-collab-row {
+      grid-template-columns: 32px minmax(0, 1fr) auto;
+    }
+    .fn-collab-role {
+      grid-column: 2;
+    }
+
+    /* .donut-row (130px 1fr): legend got 97px. */
+    .donut-row {
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: start;
+    }
+    .suggest-head {
+      flex-wrap: wrap;
+    }
+
+    /* Touch targets. The runtime audit measured toggles at 36×20, sort
+       selects at 23px, chips at 28px, auth tabs at 30px and inline
+       link-buttons at 17–28px. 40px floor for controls, 36px for inline
+       link-buttons, and the switch keeps its 20px visual but gains a 44px
+       hit area via ::before. */
+    .fn-btn {
+      min-height: 40px;
+    }
+    .fn-chip {
+      height: 36px;
+    }
+    .fn-select,
+    .settings-input,
+    .fn-sort-select {
+      min-height: 40px;
+    }
+    .fn-segment button {
+      min-height: 32px;
+      padding-inline: 12px;
+    }
+    .fn-icon-btn {
+      width: 36px;
+      height: 36px;
+    }
+    .auth-tab {
+      min-height: 40px;
+    }
+    .auth-foot button,
+    .suggest-head button,
+    .today-card .row button {
+      min-height: 36px;
+    }
+    .toggle::before {
+      content: '';
+      position: absolute;
+      inset: -12px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    /* Topbar icon-only buttons become 40px squares, matching the floor. */
+    .fn-topbar > .fn-topbar-actions .fn-btn {
+      width: 40px;
+      min-height: 40px;
     }
   }
 }

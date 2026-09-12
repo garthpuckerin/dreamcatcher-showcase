@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react'
+import { lazy, Suspense } from 'react'
 import FieldNotebookApp from './field-notebook/FieldNotebookApp'
 
 const PublicCaseStudy = lazy(() => import('./field-notebook/views/PublicCaseStudy'))

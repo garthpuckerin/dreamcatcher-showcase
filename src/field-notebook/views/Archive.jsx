@@ -105,7 +105,12 @@ export default function Archive({ archivedDreams = [], onRestore, onDelete, onDe
             ))}
           </div>
           <span className="fn-mono-label">Sort</span>
-          <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="fn-select">
+          <select
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+            className="fn-select"
+            aria-label="Sort archived dreams"
+          >
             <option value="archived">Recently archived</option>
             <option value="title">Title A-Z</option>
             <option value="status">Status</option>

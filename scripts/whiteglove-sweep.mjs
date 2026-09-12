@@ -57,7 +57,7 @@ await page.addInitScript(() => {
   try {
     window.localStorage.setItem('fn:session:v1', 'active')
     window.localStorage.setItem('fn:onboarding:v1', 'done')
-  } catch (e) {
+  } catch {
     /* no-op */
   }
 })
@@ -114,7 +114,7 @@ const go = async route => {
   await page.addInitScript(r => {
     try {
       window.localStorage.setItem('fn:route:v1', JSON.stringify(r))
-    } catch (e) {
+    } catch {
       /* no-op */
     }
   }, route)

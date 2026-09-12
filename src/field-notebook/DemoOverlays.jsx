@@ -448,71 +448,102 @@ export function FragmentReader({ fragment, dream, onClose }) {
 
 export const ONBOARDING_KEY = 'fn:onboarding:v1'
 
+// The tour narrates whatever shell the visitor actually has. Below 900px the
+// rail does not exist (bottom tab bar instead) and Settings' sidebar nav is a
+// native section picker; below 1024px the dream-detail "On this page" rail is
+// hidden. Steps are chosen from those facts at open time, so a phone never
+// gets a spotlight on a display:none element — the companion-surface rule
+// that guided tours skip steps narrating surfaces the device doesn't show.
+const TOUR_MOBILE_QUERY = '(max-width: 900px)'
+const TOUR_DETAIL_RAIL_HIDDEN_QUERY = '(max-width: 1024px)'
+
+function matches(query) {
+  return typeof window !== 'undefined' && window.matchMedia(query).matches
+}
+
+function buildTourSteps() {
+  const mobile = matches(TOUR_MOBILE_QUERY)
+  const detailRailHidden = matches(TOUR_DETAIL_RAIL_HIDDEN_QUERY)
+  return [
+    mobile
+      ? {
+          target: '[data-tour="fn-mtab"]',
+          title: 'Companion tabs',
+          body: 'Today, Dreams, and Inbox travel with you on the phone. "More" holds the rest — authoring surfaces are marked "desk" and open on desktop.',
+          route: { kind: 'today' },
+          position: 'top',
+        }
+      : {
+          target: '[data-tour="fn-rail"]',
+          title: 'Workspace map',
+          body: 'The rail keeps workspace views, brands, tools, recent dreams, and account controls visible without leaving the notebook.',
+          route: { kind: 'today' },
+          position: 'right',
+        },
+    {
+      target: '[data-tour="fn-search"]',
+      title: 'Command search',
+      body: 'Search opens the command palette for dreams, fragments, todos, and fast route switching.',
+      route: { kind: 'today' },
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="fn-new-dream"]',
+      title: 'Create from anywhere',
+      body: 'New Dream seeds a portfolio-ready workspace while fragment capture appears inside a dream detail view.',
+      route: { kind: 'today' },
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="fn-dreams-board"]',
+      title: 'All Dreams',
+      body: 'The aggregate view supports status, brand, sorting, and list/card switching without shifting the page header.',
+      route: { kind: 'all' },
+      position: 'top',
+    },
+    {
+      target: '[data-tour="fn-dream-card"]',
+      title: mobile ? 'Dream cards' : 'Dream rows',
+      body: 'Each dream summarizes progress, collaborators, fragments, todos, status, and brand before you open the wiki.',
+      route: { kind: 'all' },
+      position: mobile ? 'bottom' : 'right',
+    },
+    ...(detailRailHidden
+      ? []
+      : [
+          {
+            target: '[data-tour="fn-wiki-rail"]',
+            title: 'Wiki sections',
+            body: 'The detail rail tracks scroll position across wiki, documents, versions, retrospective, team, and timeline sections.',
+            route: { kind: 'dream', id: 1 },
+            position: 'left',
+          },
+        ]),
+    {
+      target: '[data-tour="fn-state-controls"]',
+      title: 'Dream lifecycle',
+      body: 'State controls let the demo pause, complete, archive, restore, and delete local dreams without pretending to hit production services.',
+      route: { kind: 'dream', id: 1 },
+      position: mobile ? 'bottom' : 'left',
+    },
+    {
+      target: mobile ? '[data-tour="fn-settings-jump"]' : '[data-tour="fn-settings-nav"]',
+      title: 'Production surfaces',
+      body: 'Settings shows the intended production contract: appearance, workspace policy, AI, GitHub, integrations, export, and privacy.',
+      route: { kind: 'settings' },
+      position: mobile ? 'bottom' : 'right',
+    },
+  ]
+}
+
 export function FieldNotebookTour({ open, onClose, onRoute }) {
   const [index, setIndex] = useState(0)
   const [targetRect, setTargetRect] = useState(null)
 
-  const steps = useMemo(
-    () => [
-      {
-        target: '[data-tour="fn-rail"]',
-        title: 'Workspace map',
-        body: 'The rail keeps workspace views, brands, tools, recent dreams, and account controls visible without leaving the notebook.',
-        route: { kind: 'today' },
-        position: 'right',
-      },
-      {
-        target: '[data-tour="fn-search"]',
-        title: 'Command search',
-        body: 'Search opens the command palette for dreams, fragments, todos, and fast route switching.',
-        route: { kind: 'today' },
-        position: 'bottom',
-      },
-      {
-        target: '[data-tour="fn-new-dream"]',
-        title: 'Create from anywhere',
-        body: 'New Dream seeds a portfolio-ready workspace while fragment capture appears inside a dream detail view.',
-        route: { kind: 'today' },
-        position: 'bottom',
-      },
-      {
-        target: '[data-tour="fn-dreams-board"]',
-        title: 'All Dreams',
-        body: 'The aggregate view supports status, brand, sorting, and list/card switching without shifting the page header.',
-        route: { kind: 'all' },
-        position: 'top',
-      },
-      {
-        target: '[data-tour="fn-dream-card"]',
-        title: 'Dream rows',
-        body: 'Each dream summarizes progress, collaborators, fragments, todos, status, and brand before you open the wiki.',
-        route: { kind: 'all' },
-        position: 'right',
-      },
-      {
-        target: '[data-tour="fn-wiki-rail"]',
-        title: 'Wiki sections',
-        body: 'The detail rail tracks scroll position across wiki, documents, versions, retrospective, team, and timeline sections.',
-        route: { kind: 'dream', id: 1 },
-        position: 'left',
-      },
-      {
-        target: '[data-tour="fn-state-controls"]',
-        title: 'Dream lifecycle',
-        body: 'State controls let the demo pause, complete, archive, restore, and delete local dreams without pretending to hit production services.',
-        route: { kind: 'dream', id: 1 },
-        position: 'left',
-      },
-      {
-        target: '[data-tour="fn-settings-nav"]',
-        title: 'Production surfaces',
-        body: 'Settings shows the intended production contract: appearance, workspace policy, AI, GitHub, integrations, export, and privacy.',
-        route: { kind: 'settings' },
-        position: 'right',
-      },
-    ],
-    []
-  )
+  // Re-derived on every open so a rotation or resize between tours picks
+  // the right shell.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const steps = useMemo(() => buildTourSteps(), [open])
 
   const step = steps[index]
   const complete = useCallback(() => {
@@ -550,6 +581,13 @@ export function FieldNotebookTour({ open, onClose, onRoute }) {
       target.scrollIntoView({ block: 'nearest', inline: 'nearest' })
       raf = window.requestAnimationFrame(() => {
         const rect = target.getBoundingClientRect()
+        if (rect.width === 0 && rect.height === 0) {
+          // Target is in the DOM but not rendered (display:none at this
+          // viewport). Never spotlight nothing: skip forward, or finish.
+          setIndex(current => (current >= steps.length - 1 ? current : current + 1))
+          if (index >= steps.length - 1) complete()
+          return
+        }
         setTargetRect({
           top: rect.top,
           left: rect.left,
@@ -571,7 +609,7 @@ export function FieldNotebookTour({ open, onClose, onRoute }) {
       window.removeEventListener('resize', measure)
       window.removeEventListener('scroll', measure, true)
     }
-  }, [open, step])
+  }, [open, step, index, steps.length, complete])
 
   useEffect(() => {
     if (!open) return undefined
