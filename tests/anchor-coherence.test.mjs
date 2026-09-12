@@ -115,36 +115,34 @@ test('shiftIso re-bases off the runtime clock at evaluation time, not a build-ti
   assert.equal(modB.shiftDate(anchorAtMidnight), modB.TODAY_ISO)
 })
 
-// KNOWN GAP (found while writing this gate, not fixed here — out of scope
-// for a scripts/tests-only change): `offsetFromAnchor` parses its `value`
-// with a bare `new Date(value)`, which the spec treats as UTC when `value`
-// has no time component (e.g. fixtures.js's many `iso('2026-05-25')`
-// bare-date literals), while `ANCHOR` itself is built from an explicit
-// `T00:00:00` local-time literal. In any timezone with a negative UTC
-// offset (most of the Americas — confirmed locally at UTC-4), that mismatch
-// shifts every bare-date fixture one calendar day earlier than a
-// time-qualified fixture in the same dream. This is silent (no NaN/Invalid
-// Date) and was not part of the two properties this gate was asked to
-// cover, so it is recorded here rather than asserted against — routing it
-// as a real, reproducible defect for `src/field-notebook/dates.js` is a
-// follow-up outside this change's scope (scripts/tests/package.json only).
-test('KNOWN GAP: bare-date fixtures parse against a different clock than time-qualified ones (not fixed here)', () => {
+// Regression test for a real defect found while writing this gate (2026-09-11,
+// fixed 2026-09-12): `offsetFromAnchor`/`shiftIso` used to parse `value` with
+// a bare `new Date(value)`, which the spec treats as UTC when `value` has no
+// time component (e.g. fixtures.js's many `iso('2026-05-25')` bare-date
+// literals), while `ANCHOR` itself is built from an explicit `T00:00:00`
+// local-time literal. In any negative-UTC-offset timezone (confirmed at
+// UTC-4), that mismatch silently shifted every bare-date fixture one calendar
+// day earlier than a time-qualified fixture in the same dream — no NaN/
+// Invalid Date, so the whiteglove text-defect sweep couldn't catch it either.
+// `parseLocal()` now normalizes both forms to local-time parsing before this
+// is asserted against, regardless of which timezone the test runner is in.
+test('bare-date and time-qualified fixture literals resolve to the same offset (regression: negative-UTC-offset day-shift)', () => {
   const dates = loadDatesModuleWithClock(new Date(2026, 8, 11, 12, 0, 0).getTime())
   const bareDateOffset = dates.offsetFromAnchor(dates.ANCHOR_ISO)
   const timeQualifiedOffset = dates.offsetFromAnchor(`${dates.ANCHOR_ISO}T00:00:00`)
-  // Document the current (buggy in negative-UTC-offset zones) behavior so a
-  // fix shows up here as an intentional, reviewed change rather than a
-  // silent flip. See the note above for the root cause.
-  const isAffectedTimezone = new Date().getTimezoneOffset() > 0
-  if (isAffectedTimezone) {
-    assert.notEqual(
-      bareDateOffset,
-      timeQualifiedOffset,
-      'expected the documented bare-date/time-qualified mismatch in a negative-UTC-offset timezone — if this now passes, offsetFromAnchor was fixed and this test (and its note) should be updated/removed'
-    )
-  } else {
-    assert.equal(bareDateOffset, timeQualifiedOffset)
-  }
+  assert.equal(
+    bareDateOffset,
+    timeQualifiedOffset,
+    'a bare-date literal must resolve to the same anchor offset as its time-qualified equivalent, in every timezone'
+  )
+
+  // Same property, asserted through the public shiftIso/shiftDate path a
+  // fixture actually uses, not just the internal offset calculation.
+  assert.equal(
+    dates.shiftDate(dates.ANCHOR_ISO),
+    dates.shiftDate(`${dates.ANCHOR_ISO}T00:00:00`),
+    'shiftDate must land on the same calendar day for a bare-date literal and its time-qualified equivalent'
+  )
 })
 
 test('no raw absolute-date literal leaks into a rendered/prose path outside fixtures.js/dates.js', () => {

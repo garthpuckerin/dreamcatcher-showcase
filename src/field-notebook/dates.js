@@ -55,9 +55,25 @@ export function isoFromToday(n) {
 export const ANCHOR_ISO = '2026-05-22'
 const ANCHOR = startOfDay(new Date(ANCHOR_ISO + 'T00:00:00'))
 
+/**
+ * Parse a legacy fixture literal as LOCAL time, whether or not it carries a
+ * clock component. The native `Date` parser treats a bare 'YYYY-MM-DD' string
+ * as UTC midnight but a time-qualified 'YYYY-MM-DDTHH:mm' string as local time
+ * — so without this, a bare-date fixture lands one calendar day earlier than
+ * a time-qualified one in any negative-UTC-offset timezone, silently (no
+ * NaN/Invalid Date). Forcing a bare date to `T00:00:00` makes every literal
+ * parse the same way `ANCHOR` itself does.
+ */
+function parseLocal(value) {
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return new Date(`${value}T00:00:00`)
+  }
+  return new Date(value)
+}
+
 /** Whole-day offset of a legacy date (ISO or datetime) relative to the anchor. */
 export function offsetFromAnchor(value) {
-  const d = startOfDay(new Date(value))
+  const d = startOfDay(parseLocal(value))
   return Math.round((d - ANCHOR) / MS_PER_DAY)
 }
 
@@ -67,7 +83,7 @@ export function offsetFromAnchor(value) {
  * whole dataset passed through this slides by one constant offset.
  */
 export function shiftIso(value) {
-  const original = new Date(value)
+  const original = parseLocal(value)
   const offsetDays = offsetFromAnchor(value)
   const shifted = daysFromToday(offsetDays)
   shifted.setHours(

@@ -63,9 +63,11 @@
   smoke, zero console/page/network errors), and `npm run test:sweeps`
   (whiteglove/mobile/viewport defect sweeps) must pass. `npm run test:release`
   runs the full gate. The fabricated-signal grep-gate
-  (`grep -rnE '[0-9]{1,3}\s*%\s*(confidence|accuracy|match|certainty)|confidence:\s*0?\.[0-9]' src`
+  (`grep -rnE '[0-9]{1,3}\s*%[\s-]*(confidence|confident|accuracy|accurate|match|certainty|certain)|confidence:\s*0?\.[0-9]' src`
   → must be 0 hits) is the honesty-specific check ported from the
-  2026-08-24 representativeness fix — never weaken it.
+  2026-08-24 representativeness fix — widened 2026-09-12 after a
+  "90%-confident" phrasing on the Today page slipped past the narrower
+  original pattern — never weaken it.
 - Tags: not adopted here; don't tag unilaterally.
 
 ## Publish / spoiler discipline (reveal-season)

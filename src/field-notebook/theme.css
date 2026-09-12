@@ -866,7 +866,7 @@
   /* ===== Topbar ===== */
   .fn-topbar {
     display: grid;
-    grid-template-columns: minmax(0, 240px) minmax(320px, 480px) minmax(0, 240px);
+    grid-template-columns: minmax(0, 240px) minmax(0, 480px) minmax(0, 240px);
     align-items: center;
     justify-content: space-between;
     gap: calc(var(--u) * 4);
@@ -3838,7 +3838,8 @@
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding-top: 10vh;
+    padding-block: 10vh;
+    overflow-y: auto;
     background: color-mix(in oklab, black 42%, transparent);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -3921,13 +3922,16 @@
   }
   .fn-modal {
     width: min(560px, calc(100vw - 32px));
+    max-height: min(80vh, 640px);
+    display: flex;
+    flex-direction: column;
     border: 1px solid var(--hairline);
     border-radius: var(--r-3);
     background: var(--surface);
     box-shadow:
       0 1px 0 color-mix(in oklab, var(--bg) 80%, transparent) inset,
       0 28px 80px -36px color-mix(in oklab, black 72%, transparent);
-    overflow: hidden;
+    overflow-y: auto;
   }
   .fn-modal-head {
     display: flex;
@@ -3936,6 +3940,10 @@
     gap: calc(var(--u) * 4);
     border-bottom: 1px solid var(--hairline);
     padding: calc(var(--u) * 5);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface);
   }
   .fn-modal-head h2 {
     font-family: 'Newsreader', serif;
@@ -4004,6 +4012,10 @@
     border-top: 1px solid var(--hairline);
     margin-top: calc(var(--u) * 5);
     padding: calc(var(--u) * 4) calc(var(--u) * 5);
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    background: var(--surface);
   }
 
   .fn-ai-panel {
@@ -5432,6 +5444,7 @@
     }
 
     .fn-topbar {
+      display: flex;
       align-items: center;
       flex-wrap: wrap;
     }
@@ -5535,6 +5548,10 @@
       padding: 0;
       justify-content: center;
       font-size: 0;
+    }
+
+    .kpi-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .fn-topbar-actions .fn-btn svg {

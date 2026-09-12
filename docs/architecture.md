@@ -30,7 +30,7 @@ co-occurrence — both are deterministic, citation-backed operations in producti
 that honestly instead of inventing an ML score for effect. A grep-gate enforces this at every release:
 
 ```bash
-grep -rnE '[0-9]{1,3}\s*%\s*(confidence|accuracy|match|certainty)|confidence:\s*0?\.[0-9]' src
+grep -rnE '[0-9]{1,3}\s*%[\s-]*(confidence|confident|accuracy|accurate|match|certainty|certain)|confidence:\s*0?\.[0-9]' src
 # must return 0 hits
 ```
 

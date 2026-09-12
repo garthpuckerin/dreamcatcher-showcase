@@ -93,8 +93,8 @@ export default function Today({ dreams, onOpenDream, onDemoAction }) {
           <div className="today-card">
             <div className="label">AI Assistant suggestion</div>
             <div className="quote">
-              “You have {inboxCount} inbox captures waiting. Triage them first — three are
-              90%-confident matches for existing dreams.”
+              “You have {inboxCount} inbox captures waiting. Triage them first — three pattern-match
+              existing dreams, cited in Suggestions.”
             </div>
             <div className="row">
               <span>AI Assistant · 4s ago</span>

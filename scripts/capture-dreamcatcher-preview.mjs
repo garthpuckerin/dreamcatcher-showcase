@@ -2,9 +2,9 @@
 // video) from the Dreamcatcher Field Notebook public demo. Self-contained to
 // this repo (cloned from grant-tracker-showcase/scripts/capture-preview.mjs's
 // own-repo-relative `mediaDir` pattern — this repo has no monorepo parent to
-// reach into). Run with the dev server up on :3100:
+// reach into). Run with the dev server up on :3177:
 //   npm run dev   (in another shell)
-//   PREVIEW_URL=http://localhost:3100 node scripts/capture-dreamcatcher-preview.mjs
+//   PREVIEW_URL=http://localhost:3177 node scripts/capture-dreamcatcher-preview.mjs
 //
 // The walkthrough is a deliberate tour using only known-good selectors with
 // short, explicit pauses for pacing. Optional flourishes use fail-fast
@@ -23,7 +23,7 @@ const here = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(here, '..')
 const mediaDir = path.resolve(repoRoot, 'media', 'dreamcatcher')
 const videoDir = path.resolve(mediaDir, 'video-raw')
-const baseURL = process.env.PREVIEW_URL || 'http://127.0.0.1:3100'
+const baseURL = process.env.PREVIEW_URL || 'http://127.0.0.1:3177'
 
 const wait = ms => new Promise(r => setTimeout(r, ms))
 
