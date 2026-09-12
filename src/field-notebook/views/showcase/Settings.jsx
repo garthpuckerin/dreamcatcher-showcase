@@ -363,7 +363,7 @@ export function Settings({
               body="Production stores provider keys server-side and encrypted."
             >
               <span className="settings-status" data-tone="warn">
-                Demo placeholder
+                Not stored in this preview
               </span>
             </SettingsRow>
             <SettingsRow title="Auto summaries" body="Generate summaries when fragments are added.">

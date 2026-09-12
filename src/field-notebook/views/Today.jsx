@@ -1,24 +1,44 @@
 import { useMemo } from 'react'
 import { CATEGORIES, INBOX } from '../fixtures'
+import {
+  buildActivity,
+  captureStreak,
+  collaboratorSummary,
+  fragmentsThisWeek,
+  inFlightTouchedThisWeek,
+  inboxToday,
+  priorityTodos,
+} from '../insights'
 
 const DEMO_PRESENCE_TOOLTIP =
   'Demo presence indicator. In production, this reflects live collaborator activity.'
 
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`
+
 export default function Today({ dreams, onOpenDream, onDemoAction }) {
-  const todos = useMemo(
-    () =>
-      dreams
-        .flatMap(d => d.todos.filter(t => !t.done).map(t => ({ ...t, dream: d })))
-        .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
-        .slice(0, 6),
+  // Every stat delta below derives from the fixtures against the real clock
+  // (see ../insights.js) — never a typed figure beside a derived one.
+  const signals = useMemo(
+    () => ({
+      fragmentsWeek: fragmentsThisWeek(dreams),
+      touched: inFlightTouchedThisWeek(dreams),
+      inboxToday: inboxToday(),
+      collab: collaboratorSummary(dreams),
+      streak: captureStreak(buildActivity(dreams)),
+    }),
     [dreams]
   )
+  // The same derivation feeds the rail/tab-bar Today badge, so the list and
+  // the badge can never show different counts.
+  const todos = useMemo(() => priorityTodos(dreams), [dreams])
 
   const fragmentCount = useMemo(
     () => dreams.reduce((n, d) => n + d.fragments.length, 0),
     [dreams]
   )
   const inboxCount = INBOX.length
+  const inboxMatched = INBOX.filter(item => item.suggested).length
+  const firstPriority = todos[0]?.title
 
   const overdue = todos.filter(t => new Date(t.deadline).getTime() < Date.now()).length
   const today = new Date()
@@ -49,7 +69,9 @@ export default function Today({ dreams, onOpenDream, onDemoAction }) {
               ? `${overdue} task${overdue === 1 ? '' : 's'} ${
                   overdue === 1 ? 'is' : 'are'
                 } past due. Triage first, then write.`
-              : 'Nothing past due. The AI assistant suggests starting with the Chrome Extension MV3 service worker.'}
+              : firstPriority
+                ? `Nothing past due. The AI assistant suggests starting with "${firstPriority}".`
+                : 'Nothing past due and nothing queued. Capture something.'}
           </p>
         </div>
       </div>
@@ -93,11 +115,11 @@ export default function Today({ dreams, onOpenDream, onDemoAction }) {
           <div className="today-card">
             <div className="label">AI Assistant suggestion</div>
             <div className="quote">
-              “You have {inboxCount} inbox captures waiting. Triage them first — three pattern-match
-              existing dreams, cited in Suggestions.”
+              “You have {inboxCount} inbox captures waiting. Triage them first — {inboxMatched}{' '}
+              pattern-match existing dreams, cited in Suggestions.”
             </div>
             <div className="row">
-              <span>AI Assistant · 4s ago</span>
+              <span>AI Assistant · just now</span>
               <button
                 type="button"
                 onClick={() =>
@@ -112,23 +134,36 @@ export default function Today({ dreams, onOpenDream, onDemoAction }) {
           </div>
 
           <div className="today-stat-grid">
-            <TodayStat value={fragmentCount} label="Fragments" delta="+ 14 this week" />
-            <TodayStat value={inFlightCount} label="In Flight" delta="+ 1 this week" />
-            <TodayStat value={inboxCount} label="Inbox" delta="+ 4 today" down />
             <TodayStat
-              value="3"
+              value={fragmentCount}
+              label="Fragments"
+              delta={`+ ${signals.fragmentsWeek} this week`}
+            />
+            <TodayStat
+              value={inFlightCount}
+              label="In Flight"
+              delta={`${signals.touched} touched this week`}
+            />
+            <TodayStat
+              value={inboxCount}
+              label="Inbox"
+              delta={`+ ${signals.inboxToday} today`}
+              down={signals.inboxToday > 0}
+            />
+            <TodayStat
+              value={signals.collab.count}
               label="Collaborators"
-              delta="2 online now"
+              delta={`${signals.collab.online} online now`}
               tooltip={DEMO_PRESENCE_TOOLTIP}
             />
           </div>
 
           <div className="today-card today-streak">
             <div className="label">Streak</div>
-            <h3 className="big">17 days</h3>
+            <h3 className="big">{plural(signals.streak.current, 'day')}</h3>
             <div className="row">
               <span>of daily capture</span>
-              <span>best: 32d</span>
+              <span>best: {signals.streak.best}d</span>
             </div>
           </div>
         </div>

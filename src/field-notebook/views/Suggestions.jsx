@@ -1,8 +1,16 @@
 import { useState } from 'react'
 import { AI_SUGGESTIONS } from '../fixtures'
 
-export default function Suggestions({ dreams, onOpenDream }) {
+export default function Suggestions({ dreams, onOpenDream, onDemoAction }) {
   const [dismissed, setDismissed] = useState(new Set())
+  // Dismissal is triage, not resolution: re-running the matcher re-derives the
+  // set from the fixture graph and re-raises anything whose basis persists.
+  const rerun = () => {
+    setDismissed(new Set())
+    onDemoAction?.(
+      'Matcher re-run against the fixture graph — dismissed proposals whose basis persists are re-raised.'
+    )
+  }
   const live = AI_SUGGESTIONS.filter(suggestion => !dismissed.has(suggestion.id))
   const dreamMap = Object.fromEntries(dreams.map(dream => [dream.id, dream]))
 
@@ -20,6 +28,9 @@ export default function Suggestions({ dreams, onOpenDream }) {
             the model learns from both.
           </p>
         </div>
+        <button type="button" className="fn-btn" onClick={rerun}>
+          ⟲ Re-run matcher
+        </button>
       </div>
 
       {live.map(suggestion => {
@@ -65,7 +76,10 @@ export default function Suggestions({ dreams, onOpenDream }) {
       {live.length === 0 && (
         <div className="empty">
           <h3>No suggestions right now.</h3>
-          <p>The model will check again every six hours, and on every new capture.</p>
+          <p>
+            Every proposal has been triaged. The matcher re-runs on every new capture — or
+            re-run it now to re-raise anything whose basis still holds.
+          </p>
         </div>
       )}
     </div>

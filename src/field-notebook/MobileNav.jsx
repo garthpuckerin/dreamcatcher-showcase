@@ -159,6 +159,11 @@ export function DeskOnlyScreen({ route, onRoute }) {
           Open Inbox
         </button>
       </div>
+      <p className="fn-desk-only-note fn-desk-only-escape">
+        Need it anyway?{' '}
+        <a href="?view=desktop">Open the desktop layout</a> — the workstation shell on this
+        screen, no gating.
+      </p>
     </div>
   )
 }

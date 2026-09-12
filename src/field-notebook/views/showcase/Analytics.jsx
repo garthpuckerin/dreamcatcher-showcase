@@ -1,16 +1,22 @@
 import { useMemo, useState } from 'react'
 import { BRANDS } from '../../fixtures'
-import { isoFromToday, TODAY } from '../../dates'
+import { TODAY } from '../../dates'
+import {
+  aiAcceptRate,
+  buildActivity,
+  capturesPerWeek,
+  deriveInsights,
+  fragmentsThisWeek,
+  todosClosedWithin,
+  weeklyCaptures,
+} from '../../insights'
 
-// Last 12 weeks (84 days) of activity, ending TODAY. Index 0 is the oldest day,
-// index 83 is today, so the heatmap always closes on the current period. Counts
-// follow a fixed deterministic pattern — no Math.random.
-const ACTIVITY = Array.from({ length: 84 }, (_, index) => ({
-  date: isoFromToday(index - 83),
-  count: [0, 1, 4, 2, 7, 3, 1, 5, 8, 2, 0, 3][index % 12],
-}))
+const signed = n => `${n >= 0 ? '+' : '−'} ${Math.abs(n)}`
 
 export function Analytics({ dreams }) {
+  // Every KPI value AND delta derives from the fixtures (../../insights.js);
+  // the view-honesty unit gate fails the build on a typed figure here.
+  const activity = useMemo(() => buildActivity(dreams), [dreams])
   const totals = useMemo(() => {
     const fragments = dreams.reduce((n, dream) => n + dream.fragments.length, 0)
     const todosDone = dreams.reduce(
@@ -21,11 +27,15 @@ export function Analytics({ dreams }) {
     return {
       dreams: dreams.length,
       fragments,
-      velocity: '4.2',
+      fragmentsWeek: fragmentsThisWeek(dreams),
       doneRate: todosAll ? Math.round((todosDone / todosAll) * 100) : 0,
+      closedMonth: todosClosedWithin(dreams, 30),
+      captures: capturesPerWeek(activity),
+      accepts: aiAcceptRate(),
     }
-  }, [dreams])
-  const bars = [3, 8, 5, 11, 7, 14, 9, 12, 6, 18, 10, 14]
+  }, [dreams, activity])
+  const insights = useMemo(() => deriveInsights(dreams), [dreams])
+  const bars = weeklyCaptures(activity)
   const maxBar = Math.max(...bars)
   const trendSeries = useMemo(() => buildTrendSeries(dreams, 8), [dreams])
   const velocity = useMemo(() => buildVelocity(dreams), [dreams])
@@ -62,16 +72,33 @@ export function Analytics({ dreams }) {
       </div>
 
       <div className="kpi-grid">
-        <Kpi label="Dream velocity" value={totals.velocity} delta="+ 0.6 vs prior quarter" />
-        <Kpi label="Fragments / week" value="9.7" delta="+ 22% vs 90-day avg" />
-        <Kpi label="Todo completion" value={`${totals.doneRate}%`} delta="- 4 pts" down />
-        <Kpi label="AI accepts" value="71%" delta="+ 8 pts vs prior month" />
+        <Kpi
+          label="Activity / week"
+          value={totals.captures.avg.toFixed(1)}
+          delta={`${signed(totals.captures.deltaPct)}% recent 6 wks vs prior 6`}
+          down={totals.captures.deltaPct < 0}
+        />
+        <Kpi
+          label="Fragments filed"
+          value={totals.fragments}
+          delta={`+ ${totals.fragmentsWeek} this week`}
+        />
+        <Kpi
+          label="Todo completion"
+          value={`${totals.doneRate}%`}
+          delta={`${totals.closedMonth} closed this month`}
+        />
+        <Kpi
+          label="AI accepts"
+          value={`${totals.accepts.rate}%`}
+          delta={`${totals.accepts.accepted} of ${totals.accepts.decided} proposals ratified`}
+        />
       </div>
 
       <div className="analytics-row">
         <section className="analytics-card">
-          <h3>Fragments per week</h3>
-          <div className="sub">last 12 weeks · all dreams</div>
+          <h3>Activity per week</h3>
+          <div className="sub">last 12 weeks · captures, edits, decisions</div>
           <div className="bars">
             {bars.map((value, index) => (
               <div
@@ -149,9 +176,9 @@ export function Analytics({ dreams }) {
       <div className="analytics-row analytics-even">
         <section className="analytics-card">
           <h3>Activity heatmap</h3>
-          <div className="sub">last 12 weeks · daily fragments + todos</div>
+          <div className="sub">last 12 weeks · daily captures, edits, decisions</div>
           <div className="heatmap">
-            {ACTIVITY.map((item, index) => (
+            {activity.map((item, index) => (
               <div
                 key={`${item.date}-${index}`}
                 className="cell"
@@ -174,26 +201,15 @@ export function Analytics({ dreams }) {
           <h3>Insights</h3>
           <div className="sub">automated · refreshes hourly</div>
           <div className="insight-list">
-            <Insight
-              icon="!"
-              title="Promotion lag."
-              body="Median fragment age before wiki promotion is 11 days — up from 6 last month."
-            />
-            <Insight
-              icon="↗"
-              title="Research is heating up."
-              body="Embeddings research had three captures this week; no prior week had more than one."
-            />
-            <Insight
-              icon="↓"
-              title="Northwind retainer is closing."
-              body="Last fragment 38 days ago; consider archiving or starting an analytics-phase dream."
-            />
-            <Insight
-              icon="*"
-              title="You write best on Tuesdays."
-              body="4.1x more captures on Tuesdays than weekends. Schedule deep work accordingly."
-            />
+            {insights.map(item => (
+              <Insight key={item.kind} icon={item.icon} title={item.title} body={item.body} />
+            ))}
+            {insights.length === 0 && (
+              <div className="insight">
+                <div className="ico">·</div>
+                <div>Nothing to flag this week — the workspace is moving evenly.</div>
+              </div>
+            )}
           </div>
         </section>
       </div>

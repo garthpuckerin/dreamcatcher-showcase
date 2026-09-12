@@ -54,6 +54,9 @@ export function Templates({ onApply }) {
       </div>
 
       <div className="templates-grid">
+        {list.length === 0 && (
+          <div className="fn-empty-note">No templates in this tier yet.</div>
+        )}
         {list.map(template => {
           const meta = TEMPLATE_META[template.id]
           return (

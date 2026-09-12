@@ -54,7 +54,7 @@ const expectNoViolations = async (page, label) => {
 const enter = async (page, route) => {
   await page.addInitScript(r => {
     try {
-      localStorage.setItem('fn:session:v1', 'active')
+      sessionStorage.setItem('fn:session:v1', 'active')
       localStorage.setItem('fn:onboarding:v1', 'done')
       localStorage.setItem('fn:route:v1', JSON.stringify(r))
     } catch {
@@ -84,7 +84,7 @@ for (const [vpName, viewport] of VIEWPORTS) {
     test('auth screen has no WCAG A/AA violations', async ({ page }) => {
       await page.addInitScript(() => {
         try {
-          localStorage.removeItem('fn:session:v1')
+          sessionStorage.removeItem('fn:session:v1')
         } catch {
           /* no-op */
         }
@@ -111,7 +111,7 @@ for (const [vpName, viewport] of VIEWPORTS) {
     test('onboarding tour has no WCAG A/AA violations', async ({ page }) => {
       await page.addInitScript(() => {
         try {
-          localStorage.setItem('fn:session:v1', 'active')
+          sessionStorage.setItem('fn:session:v1', 'active')
           localStorage.removeItem('fn:onboarding:v1')
           localStorage.setItem('fn:route:v1', JSON.stringify({ kind: 'today' }))
         } catch {

@@ -119,6 +119,10 @@ export default function Archive({ archivedDreams = [], onRestore, onDelete, onDe
         </div>
       </div>
 
+      {filtered.length === 0 && (
+        <div className="fn-empty-note">No archived dreams match this filter.</div>
+      )}
+
       {view === 'list' ? (
         <div className="fn-archive-list">
           {filtered.map((item, index) => (

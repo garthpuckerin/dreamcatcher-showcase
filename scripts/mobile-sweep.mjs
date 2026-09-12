@@ -105,7 +105,7 @@ for (const [vpName, width, height, tier] of VIEWPORTS) {
   const page = await ctx.newPage()
   await page.addInitScript(() => {
     try {
-      window.localStorage.setItem('fn:session:v1', 'active')
+      window.sessionStorage.setItem('fn:session:v1', 'active')
       window.localStorage.setItem('fn:onboarding:v1', 'done')
     } catch {
       /* no-op */

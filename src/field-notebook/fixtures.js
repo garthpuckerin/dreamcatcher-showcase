@@ -1211,3 +1211,23 @@ export const DEMO_GRAPH = {
   ],
   unattributed: 5,
 }
+
+// Decided AI suggestions — the history behind the "AI accepts" rate on
+// Analytics. Each entry is a past proposal from the deterministic matcher and
+// the owner's decision on it (ratified in the UI, never auto-applied).
+export const SUGGESTION_LOG = [
+  { id: 'sl-1', kind: 'merge', decision: 'accepted', decidedAt: iso('2026-03-04T10:10') },
+  { id: 'sl-2', kind: 'todo', decision: 'accepted', decidedAt: iso('2026-03-11T09:40') },
+  { id: 'sl-3', kind: 'risk', decision: 'dismissed', decidedAt: iso('2026-03-18T14:05') },
+  { id: 'sl-4', kind: 'retro', decision: 'accepted', decidedAt: iso('2026-03-25T16:20') },
+  { id: 'sl-5', kind: 'merge', decision: 'accepted', decidedAt: iso('2026-04-02T11:00') },
+  { id: 'sl-6', kind: 'todo', decision: 'dismissed', decidedAt: iso('2026-04-09T09:15') },
+  { id: 'sl-7', kind: 'merge', decision: 'accepted', decidedAt: iso('2026-04-16T13:30') },
+  { id: 'sl-8', kind: 'risk', decision: 'accepted', decidedAt: iso('2026-04-23T10:50') },
+  { id: 'sl-9', kind: 'todo', decision: 'accepted', decidedAt: iso('2026-04-30T15:10') },
+  { id: 'sl-10', kind: 'retro', decision: 'dismissed', decidedAt: iso('2026-05-06T09:00') },
+  { id: 'sl-11', kind: 'merge', decision: 'accepted', decidedAt: iso('2026-05-12T11:45') },
+  { id: 'sl-12', kind: 'todo', decision: 'accepted', decidedAt: iso('2026-05-15T14:25') },
+  { id: 'sl-13', kind: 'risk', decision: 'dismissed', decidedAt: iso('2026-05-19T10:05') },
+  { id: 'sl-14', kind: 'merge', decision: 'accepted', decidedAt: iso('2026-05-21T16:40') },
+]

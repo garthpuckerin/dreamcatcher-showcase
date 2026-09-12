@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test'
 test.describe('Layout measurements (AFTER fixes)', () => {
   test('Fix 1: auth form height EQUAL in sign-in vs sign-up mode', async ({ page }) => {
     await page.addInitScript(() => {
-      localStorage.removeItem('fn:session:v1')
+      sessionStorage.removeItem('fn:session:v1')
     })
     await page.goto('/')
 
@@ -34,7 +34,7 @@ test.describe('Layout measurements (AFTER fixes)', () => {
 
   test('Fix 2: rail-head vs topbar alignment (must remain aligned)', async ({ page }) => {
     await page.addInitScript(() => {
-      localStorage.setItem('fn:session:v1', 'active')
+      sessionStorage.setItem('fn:session:v1', 'active')
     })
     await page.goto('/')
 

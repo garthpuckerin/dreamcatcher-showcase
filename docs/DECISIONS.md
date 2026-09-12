@@ -138,3 +138,30 @@ the runner itself started satisfies it. A leaked preview from an interrupted
 earlier run held 3310 for hours today and turned every gate run into
 "Port 3310 is already in use" — a gate that cannot run is worse than a gate
 on a different local port.
+
+## 2026-09-12 — One event log behind every activity figure
+
+**Decision:** the heatmap, weekly bars, streak, activity-per-week and
+busiest-weekday figures derive from the dated records the rest of the demo
+already renders (fragment dates, done-todo deadlines, versions, documents,
+retros, inbox captures, archive dates, decided suggestions) via
+`buildActivity()` in `insights.js` — not from a separate synthetic activity
+pattern. A `SUGGESTION_LOG` fixture records past decisions so the "AI
+accepts" rate is a real ratio.
+
+**Rationale:** the checklist's rule is one canonical dataset. A hand-tuned
+84-day pattern looked like data but was a second source: it produced a
+"17-day streak" beside a derived "+0 fragments this week" on the same page.
+Deriving from the real records makes the heatmap sparser and the streak
+shorter — and true. Where the fixtures lacked a fact (decision history), the
+fact was added to the fixtures, not typed into the view.
+
+## 2026-09-12 — Landing gate is session-scoped; sign-out replays onboarding
+
+**Decision:** `fn:session:v1` lives in `sessionStorage`; sign-out removes
+both it and the once-ever onboarding flag.
+
+**Rationale:** polish checklist §4 (08-20): a persistent flag dropped the
+owner straight into an app on reveal day, bypassing the pitch. Here the auth
+screen is the landing; a fresh visit must see it, and a visitor must be able
+to replay landing → tour → app from sign-out.

@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { X, Sparkles, Send, Wand2 } from 'lucide-react'
 import { BRANDS, STATUSES, AI_SUGGESTIONS } from './fixtures'
+import { deriveInsights } from './insights'
 
-export function AIAssistant({ open, dream, onClose, onOpenDream, onDemoAction }) {
+export function AIAssistant({ open, dream, dreams = [], onClose, onOpenDream, onDemoAction }) {
   const [tab, setTab] = useState('ask')
   const [prompt, setPrompt] = useState('')
   const [messages, setMessages] = useState([])
@@ -167,16 +168,15 @@ export function AIAssistant({ open, dream, onClose, onOpenDream, onDemoAction })
 
         {tab === 'insights' && (
           <div className="fn-ai-stack">
-            <article className="fn-ai-card">
-              <div className="fn-ai-card-meta">Risk scan</div>
-              <h3>Portfolio Builder scope is drifting</h3>
-              <p>Custom domain setup appears in recent fragments but not in the original scope.</p>
-            </article>
-            <article className="fn-ai-card">
-              <div className="fn-ai-card-meta">Cadence</div>
-              <h3>Promotion lag is increasing</h3>
-              <p>Median capture-to-wiki time is up from 6 days to 11 days this month.</p>
-            </article>
+            {/* Same derived list Analytics renders — the assistant can never
+                quote a number the screen beside it does not. */}
+            {deriveInsights(dreams).map(item => (
+              <article key={item.kind} className="fn-ai-card">
+                <div className="fn-ai-card-meta">{item.kind}</div>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </article>
+            ))}
           </div>
         )}
       </div>

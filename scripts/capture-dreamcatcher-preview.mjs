@@ -70,7 +70,7 @@ async function main() {
   context.setDefaultTimeout(8000) // hard cap: no step can hang the recording
   await context.addInitScript(() => {
     try {
-      window.localStorage.removeItem('fn:session:v1')
+      window.sessionStorage.removeItem('fn:session:v1')
       window.localStorage.removeItem('fn:route:v1')
       window.localStorage.setItem('fn:onboarding:v1', 'done')
     } catch {

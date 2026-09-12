@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 import { BRANDS, USER } from './fixtures'
+import { fmtRel } from './helpers'
+import { collaboratorSummary } from './insights'
 
 const PRIMARY = [
   { id: 'today', label: 'Today', glyph: '★', badge: 'today' },
@@ -28,20 +30,26 @@ export default function Rail({ route, onRoute, dreams, counts, onSignOut }) {
     return out
   }, [dreams])
 
+  // Every badge is the same count its destination screen derives (Today's
+  // priorities, the Inbox list, the AI Suggestions list, the Archive) —
+  // `counts` is built once in FieldNotebookApp so the rail, the mobile tab
+  // bar and the pages never disagree.
   const badgeFor = kind => {
     if (kind === 'count') return dreams.length
-    if (kind === 'today') return 4
-    if (kind === 'inbox') return 12
+    if (kind === 'today') return counts.today
+    if (kind === 'inbox') return counts.inbox
     if (kind === 'ai') return counts.suggestions
-    if (kind === 'archive') return 4
+    if (kind === 'archive') return counts.archive
     return null
   }
-  const recentDreams = [1, 2, 8].map(id => dreams.find(dream => dream.id === id)).filter(Boolean)
-  const recentMeta = {
-    1: '8 frag · 8d ago',
-    2: '3 frag · 7d ago',
-    8: '1 frag · 7d ago',
-  }
+  // Three most recently updated dreams; their meta derives from the dream.
+  const recentDreams = [...dreams]
+    .sort((a, b) => new Date(b.updated) - new Date(a.updated))
+    .slice(0, 3)
+  const recentMetaFor = dream => `${dream.fragments.length} frag · ${fmtRel(dream.updated)}`
+  // Presence dot count = collaborators online across the active dreams (the
+  // same figure the Today page derives).
+  const online = useMemo(() => collaboratorSummary(dreams).online, [dreams])
 
   return (
     <aside className="fn-rail" data-tour="fn-rail">
@@ -54,7 +62,7 @@ export default function Rail({ route, onRoute, dreams, counts, onSignOut }) {
             className="h-1.5 w-1.5 rounded-full bg-good"
             style={{ boxShadow: '0 0 0 3px color-mix(in oklab, var(--good) 25%, transparent)' }}
           />
-          3
+          {online}
         </span>
       </header>
 
@@ -113,7 +121,7 @@ export default function Rail({ route, onRoute, dreams, counts, onSignOut }) {
                 className="fn-recent-item"
               >
                 <span className="fn-recent-title">{dream.title}</span>
-                <span className="fn-recent-meta">{recentMeta[dream.id]}</span>
+                <span className="fn-recent-meta">{recentMetaFor(dream)}</span>
                 <span className="fn-recent-status">◑</span>
               </button>
             ))}
@@ -126,7 +134,7 @@ export default function Rail({ route, onRoute, dreams, counts, onSignOut }) {
           <span className="fn-avatar">{USER.initials}</span>
           <div className="flex min-w-0 flex-col">
             <span className="truncate text-[12.5px] text-ink-2">{USER.email}</span>
-            <span className="fn-mono-label">{USER.plan} · 24/100</span>
+            <span className="fn-mono-label">{USER.plan} · {USER.used}/{USER.limit}</span>
           </div>
         </div>
         <button type="button" className="fn-logout" onClick={onSignOut} aria-label="Sign out">

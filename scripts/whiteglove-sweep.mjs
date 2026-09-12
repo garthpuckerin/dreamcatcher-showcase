@@ -55,7 +55,7 @@ const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } })
 const page = await ctx.newPage()
 await page.addInitScript(() => {
   try {
-    window.localStorage.setItem('fn:session:v1', 'active')
+    window.sessionStorage.setItem('fn:session:v1', 'active')
     window.localStorage.setItem('fn:onboarding:v1', 'done')
   } catch {
     /* no-op */

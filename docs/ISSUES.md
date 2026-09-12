@@ -33,6 +33,51 @@
 
 ## Closed
 
+- ✅ **Checklist walk (2026-09-12, evening) — the polish standard walked end
+  to end, not a rescan.** Everything below was invisible to the mobile/a11y
+  rescan and fell out of walking `DEMO_POLISH_CHECKLIST.md` §0–§8 item by
+  item with greps and reads:
+  - **Hand-typed figures beside derived ones (§0b/§1):** Rail badges
+    `4 / 12 / 4` while the Inbox page and tab bar derived 6; Rail presence
+    "3" and "PRO · 24/100" while Settings derived 12/100; Today deltas
+    ("+ 14 this week", "+ 4 today", "2 online now") and a "17 days / best
+    32d" streak; Analytics "Dream velocity 4.2", "9.7", "71%" and every
+    delta; the Insights list; the AI Assistant's Insights tab; the Today
+    assistant quote ("three pattern-match", "4s ago"). All derive now from
+    `src/field-notebook/insights.js`. The activity heatmap's synthetic
+    84-day pattern was itself a second dataset (a 17-day streak beside
+    "+0 fragments this week"); the series now builds from the real dated
+    records (fragments, done todos, versions, documents, retros, inbox,
+    archive, decided suggestions — one event log). `SUGGESTION_LOG` was
+    added to the fixtures so "AI accepts" is a rate over recorded decisions.
+    Gate: `tests/view-honesty.test.mjs`.
+  - **Today badge ≠ Today list:** the badge counted todos due within 7 days
+    (5) while the list showed the 6 nearest regardless. One
+    `priorityTodos()` feeds both.
+  - **Landing gate in localStorage** (`fn:session:v1`) — the exact 08-20
+    reveal-day class: a returning visitor skipped the auth/landing screen.
+    Now `sessionStorage`; every sweep/spec/capture script updated.
+  - **Sign-out did not clear the onboarding flag**, so landing → tour → app
+    could not be replayed. Fixed.
+  - **No `?view=desktop` escape hatch** — added (`useIsMobile` honors it),
+    linked from the desk-only screen.
+  - **AI Suggestions had no re-run** (dismissal is triage, not resolution):
+    "Re-run matcher" re-derives and re-raises.
+  - **Archive and Templates had no empty state** for a filter with no
+    matches. Added.
+  - **The demo's own index.html had no OG card**: og:title/description/url/
+    image + twitter:card + theme-color, `public/og.png` captured from the
+    build by `scripts/capture-og.mjs` (serves `dist/` itself). Title lost
+    its emoji.
+  - **"Demo placeholder"** status label (apologetic-copy grep) → "Not stored
+    in this preview".
+  - **No visible keyboard focus** on controls that set `outline: none` —
+    global `:focus-visible` ring added.
+  Verified: lint clean, unit 8/8, e2e 41/41, sweeps clean (the new sweep
+  caught the desk-only escape link at 16px tall on its first run — fixed).
+  Demo-driven deltas filed in the engine's `docs/ROADMAP.md`; the polish
+  checklist (§0b, §4, §4b, §6, §7, §10) and the reveal-cycle skill carry the
+  generic rules.
 - ✅ **Companion surfaces still carried desktop multi-column grids; several
   screens rendered content past the right edge of a phone** (2026-09-12,
   full rescan after the owner's "fix mobile and anything else" direction).

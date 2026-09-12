@@ -1,8 +1,9 @@
 import { lazy, Suspense, useEffect, useMemo, useState, useCallback } from 'react'
 import './theme.css'
-import { DREAMS, INBOX, AI_SUGGESTIONS, USER } from './fixtures'
+import { DREAMS, INBOX, AI_SUGGESTIONS, ARCHIVED, USER } from './fixtures'
 import { useAppearanceSettings, useStoredDreams } from './helpers'
 import { DESK_ONLY_VIEWS } from './deskOnly'
+import { priorityTodos } from './insights'
 import { MobileTabBar, MoreSheet, DeskOnlyScreen } from './MobileNav'
 import Rail from './Rail'
 import Topbar from './Topbar'
@@ -39,20 +40,53 @@ import {
 
 const BuilderNotes = lazy(() => import('./views/BuilderNotes'))
 
+// SESSION-scoped (sessionStorage), not persistent: a fresh visit always sees
+// the landing/auth screen; only in-session reloads skip it (polish checklist
+// §4, 08-20 — a weeks-old localStorage flag once dropped the owner straight
+// into an app, bypassing the pitch on reveal day). Once-ever onboarding stays
+// in localStorage.
 const SESSION_KEY = 'fn:session:v1'
+
+function readSession() {
+  try {
+    return typeof window !== 'undefined' && window.sessionStorage.getItem(SESSION_KEY) === 'active'
+  } catch {
+    return false
+  }
+}
+
+function writeSession(value) {
+  try {
+    if (value) window.sessionStorage.setItem(SESSION_KEY, 'active')
+    else window.sessionStorage.removeItem(SESSION_KEY)
+  } catch {
+    /* no-op */
+  }
+}
+
 
 const MOBILE_QUERY = '(max-width: 900px)'
 
 // Bottom-tab mobile shell kicks in at the same breakpoint the rail used to
 // collapse at, so there is exactly one nav treatment below 900px, not two.
+// `?view=desktop` is the escape hatch (polish checklist §4): a phone visitor
+// who wants the workstation layout anyway gets it, desk-only gating included.
+function wantsDesktop() {
+  try {
+    return new URLSearchParams(window.location.search).get('view') === 'desktop'
+  } catch {
+    return false
+  }
+}
+
 function useIsMobile() {
   const [mobile, setMobile] = useState(() =>
-    typeof window === 'undefined' ? false : window.matchMedia(MOBILE_QUERY).matches
+    typeof window === 'undefined' ? false : !wantsDesktop() && window.matchMedia(MOBILE_QUERY).matches
   )
   useEffect(() => {
     if (typeof window === 'undefined') return
     const mq = window.matchMedia(MOBILE_QUERY)
-    const onChange = e => setMobile(e.matches)
+    const onChange = e => setMobile(!wantsDesktop() && e.matches)
     mq.addEventListener('change', onChange)
     return () => mq.removeEventListener('change', onChange)
   }, [])
@@ -72,14 +106,7 @@ export default function FieldNotebookApp() {
   const isMobile = useIsMobile()
   const [moreOpen, setMoreOpen] = useState(false)
   const [appearance, updateAppearance] = useAppearanceSettings()
-  const [signedIn, setSignedIn] = useState(() => {
-    try {
-      if (typeof window === 'undefined') return false
-      return window.localStorage.getItem(SESSION_KEY) === 'active'
-    } catch {
-      return false
-    }
-  })
+  const [signedIn, setSignedIn] = useState(readSession)
   const [dreams, setDreams] = useStoredDreams(DREAMS)
   const [route, setRoute] = useStoredRoute({ kind: 'today' })
   const [paletteOpen, setPaletteOpen] = useState(false)
@@ -120,25 +147,34 @@ export default function FieldNotebookApp() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  const counts = useMemo(() => ({ inbox: INBOX.length, suggestions: AI_SUGGESTIONS.length }), [])
   const activeDreams = useMemo(() => dreams.filter(dream => !dream.archived), [dreams])
   const archivedDreams = useMemo(() => dreams.filter(dream => dream.archived), [dreams])
+  // One set of counts for the rail, the mobile tab bar and the More sheet —
+  // each is the number its destination screen derives, never a typed badge.
+  const counts = useMemo(
+    () => ({
+      inbox: INBOX.length,
+      suggestions: AI_SUGGESTIONS.length,
+      today: priorityTodos(activeDreams).length,
+      archive: archivedDreams.length + ARCHIVED.length,
+    }),
+    [activeDreams, archivedDreams]
+  )
 
   const openDream = useCallback(id => setRoute({ kind: 'dream', id }), [setRoute])
   const notifyDemo = useCallback(message => setDemoNotice(message), [])
   const enterPreview = useCallback(() => {
-    try {
-      window.localStorage.setItem(SESSION_KEY, 'active')
-    } catch {
-      /* no-op */
-    }
+    writeSession(true)
     setSignedIn(true)
     setRoute({ kind: 'today' })
     if (shouldOpenOnboarding()) setTourOpen(true)
   }, [setRoute])
   const signOut = useCallback(() => {
+    // Sign-out clears BOTH the session and the once-ever onboarding flag so a
+    // visitor can replay landing → tour → app (polish checklist §4).
+    writeSession(false)
     try {
-      window.localStorage.setItem(SESSION_KEY, 'signed-out')
+      window.localStorage.removeItem(ONBOARDING_KEY)
     } catch {
       /* no-op */
     }
@@ -400,7 +436,7 @@ export default function FieldNotebookApp() {
       />
     )
   } else if (route.kind === 'suggest') {
-    canvas = <Suggestions dreams={activeDreams} onOpenDream={openDream} />
+    canvas = <Suggestions dreams={activeDreams} onOpenDream={openDream} onDemoAction={notifyDemo} />
   } else if (route.kind === 'archive') {
     canvas = (
       <Archive

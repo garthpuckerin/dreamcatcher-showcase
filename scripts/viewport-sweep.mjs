@@ -40,7 +40,7 @@ for (const [vpName, width, height] of VIEWPORTS) {
   const page = await ctx.newPage()
   await page.addInitScript(() => {
     try {
-      window.localStorage.setItem('fn:session:v1', 'active')
+      window.sessionStorage.setItem('fn:session:v1', 'active')
       window.localStorage.setItem('fn:onboarding:v1', 'done')
     } catch {
       /* no-op */
@@ -183,7 +183,7 @@ for (const [vpName, width, height] of VIEWPORTS) {
   const fresh = await ctx.newPage()
   await fresh.addInitScript(() => {
     try {
-      window.localStorage.removeItem('fn:session:v1')
+      window.sessionStorage.removeItem('fn:session:v1')
     } catch {
       /* no-op */
     }
