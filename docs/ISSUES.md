@@ -39,6 +39,26 @@
 
 ## Closed
 
+- ✅ **Mobile rebuild missed several view-level desktop grids, plus a
+  vanishing topbar button** (2026-09-12, owner-caught after the mobile
+  companion shipped — "mobile view is still inappropriate for mobile").
+  The bottom-tab shell and DESK_ONLY_VIEWS routing were real, but three
+  page-level grids never got a mobile override and were never audited:
+  `.today-grid` (the Today page's Priorities/Pulse two-column layout —
+  the FIRST screen after sign-in), `.today-stat-grid`, `.analytics-row`/
+  `.analytics-row.analytics-even`, and `.velocity-row` (found by a second
+  sweep run after the first three were fixed) — all stacked to one column
+  at ≤900px. Also: the topbar's "Assistant" button rendered as an empty
+  white square on phone — its label was a literal `"* Assistant"` text
+  string, and the existing `≤640px .fn-topbar-actions .fn-btn { font-size:
+  0 }` treatment (meant to hide button labels and keep icons) hid the
+  literal asterisk along with the word, leaving nothing visible. Replaced
+  with a real `<Sparkles>` icon (lucide-react) matching the New Dream
+  button's icon+text pattern. Verified in-browser at 375×812: Priorities
+  list and Pulse cards render full-width with no wrapping/overlap, the
+  Assistant button shows its icon. Full `test:release` gate green
+  (including a second sweep run after the `.velocity-row` fix, since the
+  first `.today-grid` fix alone left that one still failing).
 - ✅ **Missing `viewport-fit=cover` / `100dvh` safe-area handling** (2026-09-12,
   applied from a prior reveal-season gotcha — GT/Ops both hit a "white strip
   along the bottom" on home-indicator iPhones from this exact cause and it was

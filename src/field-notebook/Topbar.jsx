@@ -1,4 +1,4 @@
-import { Search, Plus } from 'lucide-react'
+import { Search, Plus, Sparkles } from 'lucide-react'
 
 const ROUTE_LABELS = {
   all: 'All Dreams',
@@ -77,7 +77,7 @@ export default function Topbar({
 
       <div className="fn-topbar-actions flex items-center gap-2">
         <button type="button" onClick={onOpenAI} className="fn-btn">
-          * Assistant
+          <Sparkles size={13} /> Assistant
         </button>
         {route.kind === 'dream' && (
           <button type="button" onClick={onNewFragment} className="fn-btn fn-btn-primary">

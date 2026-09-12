@@ -6207,5 +6207,16 @@
       flex-wrap: wrap;
       gap: calc(var(--u) * 2);
     }
+
+    /* Companion-surface views still using their desktop multi-column grid —
+       stack to one column so text gets its full width instead of wrapping
+       into a squeezed track. */
+    .today-grid,
+    .today-stat-grid,
+    .analytics-row,
+    .analytics-row.analytics-even,
+    .velocity-row {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 }
