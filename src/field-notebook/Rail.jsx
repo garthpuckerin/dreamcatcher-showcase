@@ -134,7 +134,7 @@ export default function Rail({ route, onRoute, dreams, counts, onSignOut }) {
           <span className="fn-avatar">{USER.initials}</span>
           <div className="flex min-w-0 flex-col">
             <span className="truncate text-[12.5px] text-ink-2">{USER.email}</span>
-            <span className="fn-mono-label">{USER.plan} · {USER.used}/{USER.limit}</span>
+            <span className="fn-mono-label">{USER.plan} · {counts.used}/{USER.limit}</span>
           </div>
         </div>
         <button type="button" className="fn-logout" onClick={onSignOut} aria-label="Sign out">

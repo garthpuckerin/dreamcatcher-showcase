@@ -28,8 +28,11 @@ function edgePath(from, to) {
   return `M ${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}`
 }
 
-export default function GraphView() {
-  const { nodes, edges, unattributed } = DEMO_GRAPH
+// `graph` is derived upstream from the fixture graph + the current revision
+// decision (see ../revisions.js): a ratified split adds its dreams and quoted
+// links here without this view knowing why.
+export default function GraphView({ graph = DEMO_GRAPH }) {
+  const { nodes, edges, unattributed } = graph
   const positions = useMemo(() => layout(nodes), [nodes])
   const [selectedIndex, setSelectedIndex] = useState(null)
   const nodeById = useMemo(() => Object.fromEntries(nodes.map(node => [node.id, node])), [nodes])

@@ -43,7 +43,7 @@ export const CATEGORIES = [
   { value: 'strategy', label: 'Strategy' },
 ]
 
-export const DREAMS = [
+const BASE_DREAMS = [
   {
     id: 1,
     title: 'Dreamcatcher Workspace Foundation',
@@ -565,6 +565,85 @@ export const DREAMS = [
     ],
   },
 ]
+
+// The conflated origin backlog — the dream Revisions proposes to split.
+// Modeled on the engine's first real proposal against live data: its own
+// backlog held Connex, Nexus, PipelineOS and Dreamcatcher before they were
+// separate projects. Each fragment carries the artifact the trace attributes
+// it to (`artifact`); ratifying the split moves them (see ./revisions.js).
+export const ORIGIN_DREAM_ID = 9
+const ORIGIN_DREAM = {
+  id: ORIGIN_DREAM_ID,
+  title: 'Origin backlog — Connex · Nexus · Dreamcatcher · PipelineOS',
+  description:
+    'The first backlog, from before these were four projects. Every early fragment landed here; Revisions holds the artifact-anchored proposal to split it.',
+  status: 'planning',
+  brand: 'product',
+  tags: ['origin', 'conflated', 'retro-trace'],
+  created: iso('2025-09-28T10:00'),
+  updated: iso('2026-05-20T09:30'),
+  summary:
+    'A single dream that grew four projects. Nothing here changes until the proposed split is ratified — reject leaves it exactly as it is.',
+  wiki: [
+    {
+      kind: 'p',
+      text: 'This dream predates the workspace having a shape. Client integration, the internal knowledge graph, deployment orchestration and the capture loop itself were all one backlog.',
+    },
+    { kind: 'h', text: 'Why it is conflated' },
+    {
+      kind: 'p',
+      text: 'Early fragments were filed before the projects existed. The retro-trace anchors each statement to the artifact it was really about — a repo, a folder, a graph — and proposes the split; a human ratifies it.',
+    },
+  ],
+  todos: [
+    {
+      id: 9001,
+      title: 'Decide the proposed split in Revisions',
+      category: 'admin',
+      deadline: iso('2026-05-27'),
+      done: false,
+    },
+  ],
+  fragments: [
+    {
+      id: 901,
+      artifact: 'connex',
+      title: 'Connex calls into Nexus',
+      source: source('AI Assistant', iso('2025-10-02T10:20')),
+      date: iso('2025-10-02T10:20'),
+      excerpt:
+        "Connex just calls into whatever Nexus already resolved — we shouldn't re-derive the same lookup twice.",
+    },
+    {
+      id: 902,
+      artifact: 'nexus',
+      title: 'Nexus is the index behind suggestions',
+      source: source('AI Assistant', iso('2025-10-06T15:45')),
+      date: iso('2025-10-06T15:45'),
+      excerpt:
+        'Nexus is just the embeddings index Dreamcatcher queries before it shows you a suggestion.',
+    },
+    {
+      id: 903,
+      artifact: 'dreamcatcher',
+      title: 'The capture loop is the product',
+      source: source('AI Assistant', iso('2025-10-09T09:05')),
+      date: iso('2025-10-09T09:05'),
+      excerpt:
+        "Let's stop calling it PipelineOS — that was the deploy-only phase. Dreamcatcher is the whole capture loop now.",
+    },
+    {
+      id: 904,
+      artifact: 'pipelineos',
+      title: 'Hand-off to the deploy step',
+      source: source('AI Assistant', iso('2025-10-03T17:30')),
+      date: iso('2025-10-03T17:30'),
+      excerpt:
+        "The capture loop hands off to the deploy step once a fragment is marked ready — that's the PipelineOS boundary.",
+    },
+  ],
+}
+export const DREAMS = [...BASE_DREAMS, ORIGIN_DREAM]
 
 export const DOCUMENTS = {
   1: [
@@ -1131,11 +1210,14 @@ export const USER = {
 // material it patterns on; there is no similarity score anywhere in this shape.
 export const DEMO_REVISION = {
   createdAt: iso('2026-05-20T09:30'),
+  originDreamId: ORIGIN_DREAM_ID,
+  // Each split names the dream it creates on ratify (ids 91–94 are reserved
+  // for them) and the artifact key that partitions the origin's fragments.
   splits: [
-    { names: 'Connex — client integration layer', statements: 41 },
-    { names: 'Nexus — internal knowledge graph', statements: 28 },
-    { names: 'Dreamcatcher — capture-to-wiki workspace', statements: 63 },
-    { names: 'PipelineOS — deployment orchestration', statements: 19 },
+    { key: 'connex', dreamId: 91, brand: 'client', names: 'Connex — client integration layer', statements: 41 },
+    { key: 'nexus', dreamId: 92, brand: 'research', names: 'Nexus — internal knowledge graph', statements: 28 },
+    { key: 'dreamcatcher', dreamId: 93, brand: 'product', names: 'Dreamcatcher — capture-to-wiki workspace', statements: 63 },
+    { key: 'pipelineos', dreamId: 94, brand: 'team', names: 'PipelineOS — deployment orchestration', statements: 19 },
   ],
   links: [
     {

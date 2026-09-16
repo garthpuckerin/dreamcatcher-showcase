@@ -5,7 +5,7 @@ export const statusMap = Object.fromEntries(STATUSES.map(s => [s.value, s]))
 export const brandMap = Object.fromEntries(BRANDS.map(b => [b.value, b]))
 
 const PREF_KEY = 'fn:appearance:v1'
-const DREAMS_KEY = 'fn:dreams:v1'
+const DREAMS_KEY = 'fn:dreams:v2' // v2: the origin backlog dream joined the fixtures (Sep 2026)
 
 const DEFAULT_APPEARANCE = {
   theme: 'paper',

@@ -1,9 +1,16 @@
 import { lazy, Suspense, useEffect, useMemo, useState, useCallback } from 'react'
 import './theme.css'
-import { DREAMS, INBOX, AI_SUGGESTIONS, ARCHIVED, USER } from './fixtures'
+import { DREAMS, INBOX, AI_SUGGESTIONS, ARCHIVED, USER, DEMO_GRAPH, DEMO_REVISION, ORIGIN_DREAM_ID } from './fixtures'
 import { useAppearanceSettings, useStoredDreams } from './helpers'
 import { DESK_ONLY_VIEWS } from './deskOnly'
 import { priorityTodos } from './insights'
+import {
+  applyRevision,
+  readRevisionDecision,
+  revertRevision as revertRevisionState,
+  revisionGraph,
+  writeRevisionDecision,
+} from './revisions'
 import { MobileTabBar, MoreSheet, DeskOnlyScreen } from './MobileNav'
 import Rail from './Rail'
 import Topbar from './Topbar'
@@ -119,6 +126,14 @@ export default function FieldNotebookApp() {
   const [appliedTemplate, setAppliedTemplate] = useState(null)
   const [demoNotice, setDemoNotice] = useState(null)
   const [tourOpen, setTourOpen] = useState(() => signedIn && shouldOpenOnboarding())
+  // Retro-tracing decision — one source for Revisions, the Graph, Archive,
+  // Today and the rail. Persisted so a reload keeps the applied split.
+  const [revisionDecision, setRevisionDecision] = useState(() =>
+    typeof window === 'undefined' ? null : readRevisionDecision()
+  )
+  useEffect(() => {
+    writeRevisionDecision(revisionDecision)
+  }, [revisionDecision])
 
   useEffect(() => {
     const onKey = e => {
@@ -157,8 +172,11 @@ export default function FieldNotebookApp() {
       suggestions: AI_SUGGESTIONS.length,
       today: priorityTodos(activeDreams).length,
       archive: archivedDreams.length + ARCHIVED.length,
+      // Plan usage = every dream in the workspace (active + archived), live —
+      // the fixture constant drifted the moment a revision created dreams.
+      used: dreams.length + ARCHIVED.length,
     }),
-    [activeDreams, archivedDreams]
+    [dreams, activeDreams, archivedDreams]
   )
 
   const openDream = useCallback(id => setRoute({ kind: 'dream', id }), [setRoute])
@@ -245,8 +263,31 @@ export default function FieldNotebookApp() {
     [setDreams, setRoute]
   )
 
+  const revertRevision = useCallback(() => {
+    setDreams(ds => revertRevisionState(ds, DEMO_REVISION))
+    setRevisionDecision(null)
+    notifyDemo('Reverted — the origin backlog is restored exactly and the four split dreams are removed. The proposal is open again.')
+  }, [setDreams, notifyDemo])
+  const ratifyRevision = useCallback(() => {
+    const now = new Date().toISOString()
+    setDreams(ds => applyRevision(ds, DEMO_REVISION, now))
+    setRevisionDecision({ status: 'ratified', at: now })
+    notifyDemo('Ratified — applied to this workspace: four dreams created from the origin backlog, which is now archived with the reason recorded. Recorded and reversible.')
+  }, [setDreams, notifyDemo])
+  const rejectRevision = useCallback(() => {
+    setRevisionDecision({ status: 'rejected', at: new Date().toISOString() })
+    notifyDemo('Rejected — the origin backlog is unchanged. The decision is recorded either way.')
+  }, [notifyDemo])
+  const reopenRevision = useCallback(() => setRevisionDecision(null), [])
+
   const restoreDream = useCallback(
     dreamId => {
+      if (dreamId === ORIGIN_DREAM_ID && revisionDecision?.status === 'ratified') {
+        // Restoring the origin IS reverting the revision — one path, one record.
+        revertRevision()
+        setRoute({ kind: 'dream', id: dreamId })
+        return
+      }
       const now = new Date().toISOString()
       setDreams(ds =>
         ds.map(item =>
@@ -255,7 +296,7 @@ export default function FieldNotebookApp() {
       )
       setRoute({ kind: 'dream', id: dreamId })
     },
-    [setDreams, setRoute]
+    [setDreams, setRoute, revisionDecision, revertRevision]
   )
 
   const createDream = useCallback(
@@ -486,15 +527,27 @@ export default function FieldNotebookApp() {
   } else if (route.kind === 'integrations') {
     canvas = <Integrations onDemoAction={notifyDemo} />
   } else if (route.kind === 'revisions') {
-    canvas = <Revisions onDemoAction={notifyDemo} />
+    canvas = (
+      <Revisions
+        decision={revisionDecision}
+        splitDreams={dreams.filter(d => d.splitFrom?.dreamId === ORIGIN_DREAM_ID)}
+        originDream={dreams.find(d => d.id === ORIGIN_DREAM_ID)}
+        onRatify={ratifyRevision}
+        onReject={rejectRevision}
+        onRevert={revertRevision}
+        onReopen={reopenRevision}
+        onOpenDream={openDream}
+      />
+    )
   } else if (route.kind === 'graph') {
-    canvas = <GraphView />
+    canvas = <GraphView graph={revisionGraph(DEMO_GRAPH, DEMO_REVISION, revisionDecision?.status)} />
   } else if (route.kind === 'settings') {
     canvas = (
       <Settings
         appearance={appearance}
         onUpdateAppearance={updateAppearance}
         onOpenAppearance={() => setAppearanceOpen(true)}
+        usedDreams={counts.used}
         onReplayOnboarding={() => {
           setAppearanceOpen(false)
           setTourOpen(false)

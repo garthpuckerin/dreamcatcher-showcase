@@ -33,7 +33,10 @@ apart honestly instead of guessing.
 - **Revisions** *(signature workflow)* — retro-tracing. When early fragments got conflated into one dream that's
   really several projects, a trace proposes an artifact-anchored split: which statements belong to which artifact,
   quoted inter-dream links, former-name candidates, and an honest unattributed count. **Nothing applies until a
-  human ratifies it** — reject leaves the dream exactly as it was.
+  human ratifies it** — reject leaves the dream exactly as it was. **Ratify applies it, here too:** the four dreams
+  are created from the conflated origin backlog (each taking the fragments the trace attributed to it), the origin is
+  archived with the reason recorded, the Graph gains the quoted links as edges — and **Revert** restores the
+  workspace exactly. Recorded and reversible, on mock data, the same contract as production.
 - **Graph** *(signature workflow)* — a citation-edged map of how dreams relate. **Every edge is clickable and opens
   the verbatim quote or commit that justifies it** — never a similarity or co-occurrence guess, which is how most
   linked-notes graphs draw their edges. An honest margin count for statements the graph can't yet anchor.
@@ -63,7 +66,7 @@ Honesty matters more than polish, so here's the exact boundary:
 | **Data** | Mock fixtures, anchored relative to today (`shiftIso()`) so the workspace always looks current | Postgres-backed workspaces, real fragments captured from live AI-chat sessions |
 | **Fragment capture** | Illustrative fixtures only — no live capture | A Chrome extension + VS Code integration captures real ChatGPT/Claude conversations |
 | **Suggestions** | **Real interaction model** — deterministic pattern-matching against fixture data, always cited, never a confidence score | Production also computes no confidence score; suggestions are labeled trajectory projections citing the dream(s) they pattern on — this demo mirrors that honestly rather than inventing an ML score for effect |
-| **Revisions (retro-tracing)** | **Real interaction model** — a proposed split renders, ratify/reject changes local demo state, in-memory only | The engine's retro-tracing module proposes the same class of artifact-anchored split against a live workspace; ratification is recorded and reversible there too |
+| **Revisions (retro-tracing)** | **Real interaction model** — the proposal renders; **ratify applies the split to the local workspace** (four dreams created, fragments partitioned by artifact, origin archived, Graph edges added) and **revert restores it byte-for-byte** (a unit gate proves the round trip); persisted in localStorage | The engine's retro-tracing module proposes the same class of artifact-anchored split against a live workspace and applies it on owner ratification; recorded and reversible there too. The demo's origin backlog is modeled on the engine's first real proposal (its own Connex/Nexus/PipelineOS/Dreamcatcher backlog) |
 | **Graph** | **Real interaction model** — every edge click opens its citation; deterministic, time-ordered layout, no physics simulation | Every edge is backed by a verbatim quote or commit in the production graph as well — this demo's edge/citation contract is not simplified, only the dataset is |
 | **AI Assistant** | Illustrative — canned responses over fixture data | A real OpenAI-backed assistant layer (multiple endpoints: summarization, tagging, project-name detection) |
 | **Authentication** | None — a demo entry screen only | Real auth and session management |

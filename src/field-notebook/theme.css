@@ -6253,6 +6253,40 @@
     }
   }
 
+  /* Revisions — applied/decided states (2026-09-16: ratify now applies the
+     split to the workspace and revert restores it). */
+  .revision-origin-link {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .revision-decided p {
+    color: var(--ink-2);
+  }
+  .revision-decided-lead {
+    margin: 0 0 calc(var(--u) * 2);
+  }
+  .revision-created {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--u) * 2);
+    margin: calc(var(--u) * 2) 0 calc(var(--u) * 3);
+  }
+  .revision-decided .revision-actions {
+    margin-top: calc(var(--u) * 2);
+    justify-content: flex-start;
+  }
+  .revision-decided-note {
+    margin: calc(var(--u) * 2) 0 0;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
   /* ===== Companion-surface completion (2026-09-12 rescan) =====
      Derived once, not found one screenshot at a time: a static pass over
      every multi-column `grid-template-columns` in this file cross-referenced

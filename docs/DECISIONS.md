@@ -165,3 +165,23 @@ both it and the once-ever onboarding flag.
 owner straight into an app on reveal day, bypassing the pitch. Here the auth
 screen is the landing; a fresh visit must see it, and a visitor must be able
 to replay landing → tour → app from sign-out.
+
+## 2026-09-16 — Ratify applies the split; revert restores it
+
+**Decision:** on the Revisions surface, ratify now APPLIES the proposed
+artifact-anchored split to the demo workspace — four dreams created from a
+conflated origin backlog (a new fixture dream, id 9, modeled on the engine's
+first real proposal), each taking the fragments the trace attributed to its
+artifact; the origin archived with the reason recorded; the Graph re-derived
+with the proposal's quoted links as edges — and **revert** restores the
+workspace byte-for-byte (`tests/revision-apply.test.mjs` proves the round
+trip). The decision persists (`fn:revision:v1`); restoring the origin from
+Archive is the same revert. Reject records the decision and changes nothing.
+
+**Rationale:** the T-1 review asked whether the case study "truly flexes" the
+product. The previous demo stopped at "ratified — no workspace data changed",
+which was honest but demonstrated nothing: the workflow the case study sells is
+that a human's ratification changes the workspace, recorded and reversible.
+The polish checklist's own ladder (§4: do the real thing when it is cheap on
+mock data) applies. Pure functions over the dreams array keep it testable and
+keep the human decision the only trigger.

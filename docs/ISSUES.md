@@ -33,6 +33,18 @@
 
 ## Closed
 
+- ✅ **Revisions stopped short of the workflow it sells** (2026-09-16, T-1
+  review: "does the demo truly flex what Dreamcatcher can do?"). Ratify showed
+  "no workspace data changed"; production applies the split. Now ratify
+  APPLIES it to the local workspace (four dreams created from a new
+  conflated origin backlog fixture, fragments partitioned by artifact, origin
+  archived with the reason, Graph edges added from the proposal's quoted
+  links) and revert restores it byte-for-byte; the decision persists and
+  restoring the origin from Archive is the same revert. Also caught by the
+  same pass: the rail/Settings plan usage was a load-time constant that
+  drifted once dreams were created — now derived live. Gates:
+  `tests/revision-apply.test.mjs` (round trip, idempotence, graph
+  derivation); whiteglove resets the decision per screen. Full gate green.
 - ✅ **Checklist walk (2026-09-12, evening) — the polish standard walked end
   to end, not a rescan.** Everything below was invisible to the mobile/a11y
   rescan and fell out of walking `DEMO_POLISH_CHECKLIST.md` §0–§8 item by

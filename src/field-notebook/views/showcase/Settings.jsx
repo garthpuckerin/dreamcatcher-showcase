@@ -10,6 +10,7 @@ export function Settings({
   onOpenAppearance,
   onReplayOnboarding,
   onDemoAction,
+  usedDreams = USER.used,
 }) {
   const [tab, setTabState] = useState(() => {
     try {
@@ -227,10 +228,10 @@ export function Settings({
               </div>
               <div>
                 <div className="settings-value">
-                  {USER.used}/{USER.limit} dreams
+                  {usedDreams}/{USER.limit} dreams
                 </div>
                 <div className="usage-bar">
-                  <i style={{ width: `${(USER.used / USER.limit) * 100}%` }} />
+                  <i style={{ width: `${(usedDreams / USER.limit) * 100}%` }} />
                 </div>
               </div>
             </div>

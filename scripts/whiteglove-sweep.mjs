@@ -57,6 +57,10 @@ await page.addInitScript(() => {
   try {
     window.sessionStorage.setItem('fn:session:v1', 'active')
     window.localStorage.setItem('fn:onboarding:v1', 'done')
+    // Fresh workspace per screen: a ratified revision persists and would
+    // otherwise hide the Reject branch on the next Revisions visit.
+    window.localStorage.removeItem('fn:revision:v1')
+    window.localStorage.removeItem('fn:dreams:v2')
   } catch {
     /* no-op */
   }
