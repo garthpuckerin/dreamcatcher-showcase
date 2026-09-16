@@ -105,7 +105,7 @@ not by a horizontally-scrolling strip of section pills.
 
 **Rationale:** the owner has rejected "the left nav collapses into a
 horizontally-scrolling row of pills at the top of the page" outright, three
-projects running (2026-09-12 feedback, recorded in Ogham). A native select is
+projects running (2026-09-12 feedback, recorded in memory). A native select is
 the genuinely mobile-native control for "jump to one of N sections" — it opens
 the OS picker sheet on iOS/Android, costs one 44px row, and needs no scrolling
 affordance. The desktop sidebar is untouched; both are rendered and CSS swaps
