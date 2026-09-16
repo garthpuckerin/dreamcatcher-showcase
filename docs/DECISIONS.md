@@ -185,3 +185,29 @@ that a human's ratification changes the workspace, recorded and reversible.
 The polish checklist's own ladder (§4: do the real thing when it is cheap on
 mock data) applies. Pure functions over the dreams array keep it testable and
 keep the human decision the only trigger.
+
+## 2026-09-16 — No 3D "molecule" graph; the Graph stays deterministic and 2D
+
+**Decision:** the Graph view keeps its SVG capture-order layout (`GraphView.jsx`
+`layout()`: position derived purely from capture index). No force-directed or
+3D "molecule" rendering (Obsidian / Notion-graph style) ships in this demo, not
+for the Sep 17 reveal and not as a default view afterwards.
+
+**Rationale:** the owner asked (T-1, 2026-09-16) whether the popular 3D
+molecule look could be produced. It can, technically (a 3D force-graph library,
+a few hundred lines), but it contradicts the page's own printed claim: "nodes
+are laid out in capture order — same data, same layout, every time; no edge is
+drawn from similarity or co-occurrence." A physics layout re-arranges on every
+load and its clusters read as similarity, which is exactly what production does
+not compute. The molecule would look like the competitors and undercut the one
+thing that differentiates this graph: every edge is a citation. It would also
+need a WebGL accessibility answer (the axe gate runs with zero exclusions), a
+desk-only mobile gate, and a full depth pass — none of which fits T-1.
+
+**Alternatives considered:** (1) ship a 3D force graph for reveal day —
+rejected, dishonest to the product and ungated; (2) a deterministic, seeded
+"constellation" secondary view where positions are still derived from the
+record (never from physics at runtime) — deferred to `FEATURES-BACKLOG.md`,
+after the Oct 1 reveal; (3) point the molecule idea at the Oct 1 code-graph
+system, where a real graph of thousands of nodes is the product and a
+constellation rendering is truthful — recorded there as reveal-prep input.
