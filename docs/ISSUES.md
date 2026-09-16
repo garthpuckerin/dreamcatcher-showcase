@@ -12,12 +12,9 @@
   `DECISIONS.md` "No RBAC/persona model"), not a defect, but noted here so it
   isn't mistaken for an oversight: production's collaboration layer is
   roadmap, not built, so this demo doesn't depict multi-user editing.
-- 🟡 **T-2 reveal-season assets not yet produced** (Sep 15 target, reveal is
-  Sep 17): `reveal-meta/dreamcatcher.json`, the teaser asset, a capture run
-  from the LIVE deploy once this repo is the Vercel git-integration source,
-  and the `project-dreamcatcher.html` case-study rewrite on garthpuckerin.dev
-  (currently the pre-reveal teaser/lock guard page only). Not a defect —
-  scheduled, tracked here so it isn't lost.
+- ✅ (moved to Closed) T-2 reveal-season assets — produced 2026-09-16 on the
+  site side: reveal-meta, imagery from the live deploy, teaser staged, case
+  study rewritten (see garthpuckerin.dev CHANGELOG 2.18.0).
 - 🟢 **Monorepo mirror not yet retired.** `portofolio-hub/apps/dreamcatcher`
   is now redundant per the showcase-repo model but is kept per the deferral
   rule until demo↔prod reconciliation is verified (same pattern as every

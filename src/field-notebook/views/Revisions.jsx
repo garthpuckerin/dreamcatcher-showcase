@@ -49,8 +49,7 @@ export default function Revisions({
           These four artifacts were captured into one dream early on
           {originDream ? (
             <>
-              {' '}
-              (
+              {' — '}
               <button
                 type="button"
                 className="revision-origin-link"
@@ -58,7 +57,6 @@ export default function Revisions({
               >
                 {originDream.title}
               </button>
-              )
             </>
           ) : null}
           . The trace found artifact-anchored boundaries between them and proposes separating each
