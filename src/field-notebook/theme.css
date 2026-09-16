@@ -870,7 +870,11 @@
   /* ===== Topbar ===== */
   .fn-topbar {
     display: grid;
-    grid-template-columns: minmax(0, 240px) minmax(0, 480px) minmax(0, 240px);
+    /* Actions track sizes to its content: a fixed 240px cap wrapped the
+       "New Dream ⌘N" button onto two lines at the app's own full-width point
+       (1520px) — visible on the reveal OG card, 2026-09-16. The search track
+       gives way instead (minmax(0, 480px)). */
+    grid-template-columns: minmax(0, 240px) minmax(0, 480px) max-content;
     align-items: center;
     justify-content: space-between;
     gap: calc(var(--u) * 4);
@@ -935,6 +939,9 @@
   }
 
   /* ===== Buttons ===== */
+  .fn-topbar-actions .fn-btn {
+    white-space: nowrap;
+  }
   .fn-btn {
     display: inline-flex;
     align-items: center;
