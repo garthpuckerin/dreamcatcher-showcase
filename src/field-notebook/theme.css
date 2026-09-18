@@ -556,8 +556,16 @@
   }
 
   .auth-screen {
-    min-height: 100vh;
-    min-height: 100dvh;
+    /* #root is clipped to a fixed 100dvh with overflow:hidden (correct for
+       the post-login app shell, which scrolls internally per-panel) — so
+       this screen must be ITS OWN scroll container, not rely on min-height
+       to "grow": min-height never gets the chance to scroll, it just gets
+       clipped by #root the moment content exceeds one viewport (owner-
+       caught on tablet landscape, where the form column is taller than a
+       768px-tall viewport and "Sign in" was unreachable). */
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(420px, 0.86fr);
     background:
@@ -1092,7 +1100,14 @@
     margin-bottom: calc(var(--u) * 6);
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    /* flex-start, not flex-end: a trailing action button must anchor near
+       the eyebrow/title, not wherever the lead paragraph happens to end.
+       flex-end bottom-aligned it against the whole title+lead block, so on
+       any width narrow enough to wrap the h1 (owner-caught on tablet
+       landscape — Builder Notes' "Public preview contract", Suggestions'
+       "Re-run matcher") the button visually crowded the last line of body
+       copy instead of reading as a page-level action. */
+    align-items: flex-start;
     gap: 32px;
   }
   .page-head-2 .l {
@@ -4687,6 +4702,13 @@
   .fn-detail-head {
     display: flex;
     justify-content: space-between;
+    /* Without this, the default flex stretch makes .fn-detail-actions match
+       the title's height — harmless when the title is one line, but at
+       tablet-landscape widths a long title wraps to 4-5 lines and the
+       actions column (avatars/Assistant/state controls) gets stretched
+       into that same tall box, scattering its own content with dead
+       space instead of sitting compactly at the top (owner-caught). */
+    align-items: flex-start;
     gap: calc(var(--u) * 8);
     margin-bottom: calc(var(--u) * 6);
   }

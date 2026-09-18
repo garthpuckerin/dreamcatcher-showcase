@@ -30,6 +30,43 @@
 
 ## Closed
 
+- ✅ **T+0 tablet-landscape pass (2026-09-17, owner-caught post-reveal:
+  "broken on ipad landscape view, layout were off and other
+  inconsistencies").** A thorough walk of every view at 1024×768,
+  1180×820, and 768×1024 (the automated gate's axe/e2e suite only ever
+  renders "desktop" and "phone" widths — this range had never actually
+  been looked at) found and fixed 4 real defects:
+  1. **Auth screen was unreachable below a ~930px-tall viewport.** `#root`
+     is a fixed `height:100dvh; overflow:hidden` (correct for the
+     post-login app shell, which scrolls internally per-panel), but
+     `.auth-screen` only had `min-height` — content taller than the
+     viewport was silently clipped with nowhere to scroll, so "Sign in"
+     and everything below it was unreachable on shorter/tablet-landscape
+     viewports. Fixed by making `.auth-screen` itself a fixed-height
+     (`100dvh`) `overflow-y:auto` scroll container.
+  2. **Graph node labels clipped at both edges.** `MARGIN_X = 70` wasn't
+     wide enough for a centered label's half-width on the first/last
+     node — "Dreamcatcher Workspace Foundation" read as "mcatcher
+     Workspace Foundation", "Why pgvector at our scale" got cut off
+     mid-word. Raised to 110 (fits the longest fixture label with
+     headroom).
+  3. **`.page-head-2`'s trailing action button crowded the lead
+     paragraph** on every view that has one (Builder Notes, Suggestions,
+     Templates, Inbox) — `align-items:flex-end` bottom-aligned the
+     button against the whole title+lead block, so once the h1 wrapped
+     to 2 lines (any width narrower than full desktop) the button
+     visually floated mid-paragraph instead of reading as a page-level
+     action. Changed to `flex-start` — the button now anchors near the
+     eyebrow/title on every view that has one, at every width.
+  4. **Dream-detail's actions column stretched to match a wrapped
+     title's height**, scattering avatars/Assistant/state-controls with
+     dead space instead of sitting compact at the top. Same root cause
+     as #3 (default flex stretch reacting to the sibling title's wrap
+     height) — `.fn-detail-head` now sets `align-items:flex-start`.
+  Verified in-browser at all three tablet widths after each fix (not
+  just the one that surfaced it); full `test:release` gate green
+  throughout (12 unit / 41 e2e incl. axe WCAG A/AA on every screen ×
+  desktop+phone / all 3 sweeps).
 - ✅ **Revisions stopped short of the workflow it sells** (2026-09-16, T-1
   review: "does the demo truly flex what Dreamcatcher can do?"). Ratify showed
   "no workspace data changed"; production applies the split. Now ratify

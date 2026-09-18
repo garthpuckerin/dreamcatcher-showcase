@@ -3,7 +3,13 @@ import { DEMO_GRAPH } from '../fixtures'
 
 const NODE_R = 8
 const STEP_X = 150
-const MARGIN_X = 70
+// Wide enough that a centered label on the first/last node never clips
+// against the viewBox edge — the longest fixture label ("Northwind Health
+// Onboarding Redesign", 37 chars at 9px monospace) needs ~100px of half-
+// width; 110 leaves headroom without over-widening the layout for shorter
+// labels (owner-caught on tablet landscape: edge labels were reading as
+// "mcatcher Workspace Foundation" / "Why pgvector at our s...").
+const MARGIN_X = 110
 const LANE_TOP = 70
 const LANE_BOTTOM = 150
 
