@@ -27,6 +27,27 @@
   so the `viewport-fit=cover` + `100dvh` treatment (closed below) has never
   been seen on a real device for this demo. Owner action; nothing to fix
   until it is looked at.
+- 🟠 **Mobile companion debt from the 2026-09-21 benchmark** (filed 2026-10-20
+  from `portofolio-hub/docs/MOBILE_COMPANION_BENCHMARK.md`; source spot-checks
+  noted, not re-measured live). Remediation order: Phase 3b of the plan.
+  1. **`?view=desktop` renders desk-only content inside the phone shell** (Graph
+     canvas squeezed to ~50px). Visible. Gate the shell, use the viewport-meta
+     technique.
+  2. **Dream detail: 37 of 55 targets under 44px**; the sweep's floor is 32px,
+     height only. Visible.
+  3. **Landing: 11 of 11 targets under 44px in every shape**, and it scrolls
+     inside `div.auth-screen`. Visible.
+  4. **Phone landscape leaves 45% of the screen for content** (189px of bars in
+     342px). Visible.
+  5. **Literal `"* AI Assistant"` button label** at
+     `src/field-notebook/views/DreamDetail.jsx:148` (confirmed 2026-10-20; the
+     asterisk-placeholder bug recorded as fixed elsewhere). Visible, cosmetic.
+  6. **No tablet tier** (single 900px breakpoint); status filter is a pill row;
+     routes are `localStorage`, not URL-addressable. Visible.
+  7. **Desktop shells always mounted and hidden by CSS** rather than not
+     mounted. Latent, root cause of items 1 and 3.
+  8. **`src/field-notebook/theme.css` is 6,524 lines** (6,400 on 09-21). Latent.
+     Split after the mobile work as a pure move.
 
 ## Closed
 
